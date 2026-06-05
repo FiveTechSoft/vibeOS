@@ -242,15 +242,29 @@
         document.getElementById('run-error').textContent = 'Error: ' + err;
         return;
       }
-      // Generate a unique window id
+      // Generate a unique window id, inject center positioning
       var winId = 'win-hallucinated-' + Date.now();
       html = html.replace(/id="win-[^"]*"/, 'id="' + winId + '"');
+      // Replace or add style attribute to center window
+      if (/style="/.test(html)) {
+        html = html.replace(/style="/, 'style="top:50%;left:50%;transform:translate(-50%,-50%);');
+      } else {
+        html = html.replace(/class="window"/, 'class="window" style="top:50%;left:50%;transform:translate(-50%,-50%)"');
+      }
       applyDelta({ id: 'windows-container', op: 'append', html: html });
       hideRunDialog();
-      // Bring to front
+      // Center precisely after layout
       setTimeout(function() {
         var win = document.getElementById(winId);
-        if (win) { win.style.zIndex = 1000; }
+        if (win) {
+          win.style.zIndex = 1000;
+          // Remove transform centering, use precise pixel position
+          var r = win.getBoundingClientRect();
+          var vw = window.innerWidth, vh = window.innerHeight;
+          win.style.transform = '';
+          win.style.top = Math.max(30, (vh - r.height) / 2) + 'px';
+          win.style.left = Math.max(0, (vw - r.width) / 2) + 'px';
+        }
       }, 100);
     });
   }

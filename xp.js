@@ -107,24 +107,58 @@
   });
 
   // ---------------------------------------------------------------
-  // 4. Window dragging
+  // 4. Window dragging + resizing
   // ---------------------------------------------------------------
   var dragState = null;
+  var RESIZE_EDGE = 8; // px from edge to trigger resize
+
+  function getResizeDir(win, clientX, clientY) {
+    var r = win.getBoundingClientRect();
+    var onRight  = (clientX >= r.right  - RESIZE_EDGE && clientX <= r.right  + RESIZE_EDGE);
+    var onBottom = (clientY >= r.bottom - RESIZE_EDGE && clientY <= r.bottom + RESIZE_EDGE);
+    var onLeft   = (clientX >= r.left   - RESIZE_EDGE && clientX <= r.left   + RESIZE_EDGE);
+    var onTop    = (clientY >= r.top    - RESIZE_EDGE && clientY <= r.top    + RESIZE_EDGE);
+    if (onRight && onBottom) return 'se';
+    if (onRight && onTop)    return 'ne';
+    if (onLeft  && onBottom) return 'sw';
+    if (onLeft  && onTop)    return 'nw';
+    if (onRight)  return 'e';
+    if (onBottom) return 's';
+    if (onLeft)   return 'w';
+    if (onTop)    return 'n';
+    return null;
+  }
 
   document.addEventListener('mousedown', function (e) {
+    // Check for resize first (edge grab)
+    var win = e.target.closest('.window');
+    if (win && !win.classList.contains('maximized')) {
+      var dir = getResizeDir(win, e.clientX, e.clientY);
+      if (dir && !e.target.closest('button') && !e.target.closest('input') && !e.target.closest('textarea')) {
+        var r = win.getBoundingClientRect();
+        dragState = {
+          win: win, dir: dir, resize: true,
+          startX: e.clientX, startY: e.clientY,
+          origW: r.width, origH: r.height,
+          origLeft: r.left, origTop: r.top
+        };
+        e.preventDefault();
+        return;
+      }
+    }
+
+    // Check for title bar drag
     var titleBar = e.target.closest('.title-bar');
     if (!titleBar) return;
-    if (e.target.closest('button')) return; // Don't drag on button click
+    if (e.target.closest('button')) return;
 
-    var win = titleBar.closest('.window');
-    if (!win) return;
+    win = titleBar.closest('.window');
+    if (!win || win.classList.contains('maximized')) return;
 
     dragState = {
-      win: win,
-      startX: e.clientX,
-      startY: e.clientY,
-      origLeft: win.offsetLeft,
-      origTop: win.offsetTop
+      win: win, dir: null, resize: false,
+      startX: e.clientX, startY: e.clientY,
+      origLeft: win.offsetLeft, origTop: win.offsetTop
     };
 
     // Increase z-index
@@ -140,13 +174,38 @@
   });
 
   document.addEventListener('mousemove', function (e) {
-    if (!dragState) return;
+    if (!dragState) {
+      // Update cursor for resize hints
+      var win = e.target.closest('.window');
+      if (win && !win.classList.contains('maximized')) {
+        var dir = getResizeDir(win, e.clientX, e.clientY);
+        if (dir && !e.target.closest('button') && !e.target.closest('input') && !e.target.closest('textarea')) {
+          var cursors = { n:'ns-resize', s:'ns-resize', e:'ew-resize', w:'ew-resize',
+                         ne:'nesw-resize', sw:'nesw-resize', nw:'nwse-resize', se:'nwse-resize' };
+          win.style.cursor = cursors[dir] || '';
+          return;
+        }
+      }
+      if (win) win.style.cursor = '';
+      return;
+    }
 
-    var dx = e.clientX - dragState.startX;
-    var dy = e.clientY - dragState.startY;
+    if (dragState.resize) {
+      var dx = e.clientX - dragState.startX;
+      var dy = e.clientY - dragState.startY;
+      var dir = dragState.dir;
+      var w = dragState.win;
 
-    dragState.win.style.left = (dragState.origLeft + dx) + 'px';
-    dragState.win.style.top = (dragState.origTop + dy) + 'px';
+      if (dir.indexOf('e') >= 0) w.style.width  = Math.max(250, dragState.origW + dx) + 'px';
+      if (dir.indexOf('w') >= 0) { w.style.width = Math.max(250, dragState.origW - dx) + 'px'; w.style.left = (dragState.origLeft + dx) + 'px'; }
+      if (dir.indexOf('s') >= 0) w.style.height = Math.max(120, dragState.origH + dy) + 'px';
+      if (dir.indexOf('n') >= 0) { w.style.height = Math.max(120, dragState.origH - dy) + 'px'; w.style.top = (dragState.origTop + dy) + 'px'; }
+    } else {
+      var dx2 = e.clientX - dragState.startX;
+      var dy2 = e.clientY - dragState.startY;
+      dragState.win.style.left = (dragState.origLeft + dx2) + 'px';
+      dragState.win.style.top  = (dragState.origTop  + dy2) + 'px';
+    }
   });
 
   document.addEventListener('mouseup', function () {
