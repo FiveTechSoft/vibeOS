@@ -9,8 +9,13 @@ FUNCTION ServeStatic(cPath)
       cPath := "/desktop.html"
    ENDIF
 
-   cFile := cRoot + SubStr(cPath, 2)
+   cFile := hb_FNameMerge(cRoot, SubStr(cPath, 2))
    cFile := StrTran(cFile, "/", hb_ps())
+
+   // Validate resolved path stays within assets root
+   IF Left(cFile, Len(cRoot)) != cRoot
+      RETURN NIL
+   ENDIF
 
    IF !hb_vfExists(cFile)
       RETURN NIL

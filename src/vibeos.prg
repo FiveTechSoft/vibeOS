@@ -22,7 +22,7 @@ PROCEDURE Main()
 RETURN
 
 
-STATIC FUNCTION HandleRequest(cMethod, cPath, hHeaders, cBody)
+STATIC FUNCTION HandleRequest(cMethod, cPath, _hHeaders, cBody)
    LOCAL oResp := { "code" => 404, "body" => "Not Found", "mime" => "text/plain" }
    LOCAL aResult
 
@@ -55,3 +55,11 @@ STATIC FUNCTION HandleRequest(cMethod, cPath, hHeaders, cBody)
    ENDIF
 
 RETURN oResp
+
+
+// Stub forward declarations — replaced when vibehtml.prg is created (Task 8)
+FUNCTION DesktopInit()
+RETURN { "code" => 503, "body" => "Not implemented", "mime" => "text/plain" }
+
+FUNCTION HandleAction(cBody)
+RETURN { "code" => 503, "body" => "Not implemented", "mime" => "text/plain" }
