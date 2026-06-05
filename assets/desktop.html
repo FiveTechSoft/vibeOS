@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeOS — Windows XP</title>
+  <link rel="stylesheet" href="/assets/xp.css">
+</head>
+<body>
+  <div class="desktop" id="desktop">
+
+    <!-- Desktop Icons -->
+    <div class="desktop-icons" id="desktop-icons">
+
+      <div class="desktop-icon" id="icon-ie" data-action="open-ie">
+        <div class="icon-img">🌐</div>
+        <div class="icon-label">Internet Explorer</div>
+      </div>
+
+      <div class="desktop-icon" id="icon-paint" data-action="open-paint">
+        <div class="icon-img">🎨</div>
+        <div class="icon-label">Paint</div>
+      </div>
+
+      <div class="desktop-icon" id="icon-notepad" data-action="open-notepad">
+        <div class="icon-img">📝</div>
+        <div class="icon-label">Notepad</div>
+      </div>
+
+      <div class="desktop-icon" id="icon-explorer" data-action="open-explorer">
+        <div class="icon-img">📁</div>
+        <div class="icon-label">File Explorer</div>
+      </div>
+
+      <div class="desktop-icon" id="icon-calc" data-action="open-calc">
+        <div class="icon-img">🧮</div>
+        <div class="icon-label">Calculator</div>
+      </div>
+
+      <div class="desktop-icon" id="icon-cmd" data-action="open-cmd">
+        <div class="icon-img">⬛</div>
+        <div class="icon-label">Command Prompt</div>
+      </div>
+
+      <div class="desktop-icon" id="icon-minesweeper" data-action="open-minesweeper">
+        <div class="icon-img">💣</div>
+        <div class="icon-label">Minesweeper</div>
+      </div>
+
+      <div class="desktop-icon" id="icon-wmp" data-action="open-wmp">
+        <div class="icon-img">🎵</div>
+        <div class="icon-label">Media Player</div>
+      </div>
+
+    </div>
+
+    <!-- Windows container (populated by vibe.js) -->
+    <div id="windows-container"></div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="start-menu" style="display:none">
+      <div class="start-header">VibeOS</div>
+      <div class="start-body">
+        <div class="start-left">
+
+          <div class="start-item" id="start-ie" data-action="open-ie">
+            <span class="start-icon">🌐</span>
+            <span>Internet Explorer</span>
+          </div>
+
+          <div class="start-item" id="start-paint" data-action="open-paint">
+            <span class="start-icon">🎨</span>
+            <span>Paint</span>
+          </div>
+
+          <div class="start-item" id="start-notepad" data-action="open-notepad">
+            <span class="start-icon">📝</span>
+            <span>Notepad</span>
+          </div>
+
+          <div class="start-item" id="start-explorer" data-action="open-explorer">
+            <span class="start-icon">📁</span>
+            <span>File Explorer</span>
+          </div>
+
+          <div class="start-item" id="start-calc" data-action="open-calc">
+            <span class="start-icon">🧮</span>
+            <span>Calculator</span>
+          </div>
+
+          <div class="start-item" id="start-cmd" data-action="open-cmd">
+            <span class="start-icon">⬛</span>
+            <span>Command Prompt</span>
+          </div>
+
+        </div>
+        <div class="start-right">
+
+          <div class="start-item" id="start-logoff" data-action="logoff">
+            <span class="start-icon">🔒</span>
+            <span>Log Off</span>
+          </div>
+
+          <div class="start-item" id="start-shutdown" data-action="shutdown">
+            <span class="start-icon">🔌</span>
+            <span>Shut Down</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar" id="taskbar">
+      <button class="start-btn" id="btn-start">🪟 Start</button>
+      <div class="taskbar-spacer"></div>
+      <div class="system-tray" id="system-tray">🕐 <span id="clock">12:00 PM</span></div>
+    </div>
+
+  </div>
+
+  <script src="/assets/xp.js"></script>
+  <script src="/assets/vibe.js"></script>
+</body>
+</html>
