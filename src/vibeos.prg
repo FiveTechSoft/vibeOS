@@ -55,11 +55,3 @@ STATIC FUNCTION HandleRequest(cMethod, cPath, _hHeaders, cBody)
    ENDIF
 
 RETURN oResp
-
-
-// Stub forward declarations — replaced when vibehtml.prg is created (Task 8)
-FUNCTION DesktopInit()
-RETURN { "code" => 503, "body" => "Not implemented", "mime" => "text/plain" }
-
-FUNCTION HandleAction(cBody)
-RETURN { "code" => 503, "body" => "Not implemented", "mime" => "text/plain" }
