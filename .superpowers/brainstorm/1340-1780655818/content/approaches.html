@@ -1,0 +1,62 @@
+<h2>3 Enfoques de Arquitectura para vibeOS</h2>
+<p class="subtitle">Stack confirmado: Harbour + DeepSeek (vía componentes CCHarbour). Escritorio completo multi-ventana.</p>
+
+<div class="section">
+  <h3>Componentes Disponibles (ya existen, no hay que reescribir)</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+    <div style="border:1px solid #3cb371;background:#f0fff0;border-radius:6px;padding:10px;flex:1;min-width:160px">
+      <strong>🧠 ccapi.prg</strong><br>
+      <small>Cliente DeepSeek streaming SSE. Chat completions con tool calls.</small>
+    </div>
+    <div style="border:1px solid #3cb371;background:#f0fff0;border-radius:6px;padding:10px;flex:1;min-width:160px">
+      <strong>🌐 cchttp.prg</strong><br>
+      <small>HTTP via curl. Soporta POST streaming y GET/POST acumulado.</small>
+    </div>
+    <div style="border:1px solid #3cb371;background:#f0fff0;border-radius:6px;padding:10px;flex:1;min-width:160px">
+      <strong>📡 hbhttpd</strong><br>
+      <small>Servidor HTTP multihilo. Sesiones, routing, keep-alive, SSL.</small>
+    </div>
+    <div style="border:1px solid #3cb371;background:#f0fff0;border-radius:6px;padding:10px;flex:1;min-width:160px">
+      <strong>🔧 ccconfig.prg</strong><br>
+      <small>Resolución de API key, base URL, proveedor.</small>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Monolito Harbour (RECOMENDADO)</h3>
+      <p>Un solo .exe con servidor HTTP embebido (hbhttpd) + cliente DeepSeek (ccapi). Sirve estáticos (CSS XP, JS) y API en mismo proceso. Sesiones hbhttpd mapean 1:1 a windowSessions del LLM. ~3-4MB binario final.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Un solo binario, un solo proceso</li><li>Sesiones nativas = estado de ventanas</li><li>Mínimo overhead, máxima velocidad</li><li>Fácil deploy (copiar .exe + assets/)</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Todo en Harbour (curva si no conoces)</li><li>Sin hot-reload de frontend</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Harbour API + Frontend Separado</h3>
+      <p>Harbour backend solo como API (DeepSeek proxy + estado). Frontend servido por separado (Node/Vite o nginx). Comunicación vía WebSocket o SSE.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Separación clara front/back</li><li>Hot-reload en desarrollo</li><li>Frontend puede usar cualquier tooling JS</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Dos procesos que gestionar</li><li>Necesita WebSocket/SSE extra</li><li>Más complejidad de deploy</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Mínimo: Harbour sirve un solo HTML generado</h3>
+      <p>Harbour genera HTML inicial completo con sistema LLM. El frontend carga ese HTML y hace fetch al backend para deltas. Sin assets estáticos separados.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Extremadamente simple</li><li>Todo inline, sin archivos CSS/JS separados</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>CSS y JS embebidos en cada request</li><li>No aprovecha caché del navegador</li><li>Difícil debuggear frontend</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

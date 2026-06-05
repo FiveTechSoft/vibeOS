@@ -1,0 +1,84 @@
+<h2>vibeOS — Visión General de Arquitectura</h2>
+<p class="subtitle">Sistema Operativo Windows XP simulado por IA. Inspirado en la demo de Steve Sanderson (Microsoft Build 2026).</p>
+
+<div class="section">
+  <h3>Flujo de Datos</h3>
+  <div class="mockup">
+    <div class="mockup-header">Arquitectura vibeOS</div>
+    <div class="mockup-body">
+      <div style="display:flex;flex-direction:column;gap:16px;padding:16px;font-family:monospace;font-size:13px;line-height:1.6">
+
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="background:#ffe4b5;border:2px solid #daa520;border-radius:8px;padding:10px 16px;text-align:center;min-width:140px">🖥️ Navegador</div>
+          <span style="font-size:20px">→</span>
+          <div style="background:#e6e6fa;border:2px solid #9370db;border-radius:8px;padding:10px 16px;text-align:center;min-width:140px">🌐 Frontend<br><small>HTML + CSS XP + JS</small></div>
+          <span style="font-size:20px">→</span>
+          <div style="background:#e0f0e0;border:2px solid #3cb371;border-radius:8px;padding:10px 16px;text-align:center;min-width:140px">🔧 Backend API<br><small>Proxy + Estado</small></div>
+          <span style="font-size:20px">→</span>
+          <div style="background:#f0e0e0;border:2px solid #cd5c5c;border-radius:8px;padding:10px 16px;text-align:center;min-width:140px">🧠 LLM<br><small>Claude / GPT</small></div>
+        </div>
+
+        <div style="display:flex;gap:16px;justify-content:center">
+          <div style="border:1px dashed #999;border-radius:8px;padding:12px;background:#fafafa;max-width:280px">
+            <strong>HTML Inicial</strong>
+            <p style="margin:6px 0 0 0;color:#555">Ventana completa (escritorio, apps, menús)</p>
+          </div>
+          <div style="border:1px dashed #999;border-radius:8px;padding:12px;background:#fafafa;max-width:280px">
+            <strong>Δ Deltas HTML</strong>
+            <p style="margin:6px 0 0 0;color:#555">Solo fragmentos mínimos con ID al interactuar</p>
+          </div>
+          <div style="border:1px dashed #999;border-radius:8px;padding:12px;background:#fafafa;max-width:280px">
+            <strong>Session State</strong>
+            <p style="margin:6px 0 0 0;color:#555">Mapa de windowSessions, load/save entre apps</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Componentes Clave</h3>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-body">
+        <h3>🎨 CSS Theme</h3>
+        <p>Librería CSS Windows XP (Luna). Botones, ventanas, menús, tabs, tree-view, campos formulario, status bar, diálogos.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>⚡ JS Runtime</h3>
+        <p>Comportamientos pre-cargados: menú dropdowns, tab switching, tree expand/collapse, drag de ventanas, envío de interacciones al backend.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>🔧 Backend (Proxy)</h3>
+        <p>Mantiene system prompt + windowSessions. Envía contexto al LLM. Recibe deltas HTML y los reenvía al frontend.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h3>🧠 LLM Engine</h3>
+        <p>Genera HTML inicial y responde a interacciones con deltas. Mantiene coherencia del "SO" + improv/comedia.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Aplicaciones (todas hallucinadas por LLM)</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:8px">
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">🌐 Internet Explorer</span>
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">🎨 Paint</span>
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">📝 Notepad</span>
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">📁 File Explorer</span>
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">🧮 Calculadora</span>
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">⬛ Command Prompt</span>
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">💣 Minesweeper</span>
+    <span style="background:#ece9d8;border:1px solid #aca899;padding:4px 10px;border-radius:3px;font-size:13px">🎵 Media Player</span>
+  </div>
+</div>
