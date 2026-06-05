@@ -58,9 +58,12 @@ input, textarea, [contenteditable] {
 .desktop-icons {
   display: flex; flex-direction: column; flex-wrap: wrap;
   padding: 12px; gap: 4px;
-  max-height: calc(100vh - 30px);
+  flex: 1; overflow: auto;
   align-content: flex-start;
 }
+
+/* Windows container — takes no space, windows are position:fixed */
+#windows-container { flex: 0; height: 0; overflow: visible; }
 .desktop-icon {
   display: flex; flex-direction: column; align-items: center;
   width: 72px; padding: 6px 4px; cursor: pointer; border-radius: 4px;

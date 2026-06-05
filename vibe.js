@@ -72,7 +72,7 @@
     'open-calc': function() {
       return '<div class="window" id="win-calc" style="top:100px;left:200px;width:280px;height:340px;z-index:10">' +
       '<div class="title-bar"><span class="title-bar-icon">🧮</span><div class="title-bar-text">Calculator</div>' +
-      '<div class="title-bar-controls"><button class="min-btn">─</button><button class="close-btn">✕</button></div></div>' +
+      '<div class="title-bar-controls"><button class="min-btn">─</button><button class="max-btn">□</button><button class="close-btn">✕</button></div></div>' +
       '<div class="window-body" style="padding:8px;display:flex;flex-direction:column;gap:4px">' +
       '<input type="text" id="calc-display" style="text-align:right;font-size:16px;width:100%" value="0" readonly>' +
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px">' +
@@ -144,15 +144,18 @@
 
     var systemPrompt = 'You are simulating a Windows XP application UI. ' +
       'You return ONLY raw HTML for an app window. ' +
-      'The HTML must be a single <div class="window"> element with a unique id. ' +
-      'Include <div class="title-bar"> with title-bar-text and title-bar-controls (min, max, close buttons). ' +
-      'Include <div class="window-body"> with appropriate UI controls. ' +
-      'Use XP CSS classes: window, title-bar, title-bar-text, title-bar-controls, window-body, status-bar, field-row, menu-bar, tabs, tree-view. ' +
+      'CRITICAL: The HTML must be a <div class="window"> with a unique id. ' +
+      'The window MUST include these EXACT elements inside a <div class="title-bar">: ' +
+      '<div class="title-bar-text">App Name</div> ' +
+      '<div class="title-bar-controls"><button class="min-btn">─</button><button class="max-btn">□</button><button class="close-btn">✕</button></div> ' +
+      'After title-bar, include <div class="window-body"> with appropriate UI. ' +
+      'Optionally add <div class="status-bar"> at the bottom. ' +
+      'Use XP CSS classes: window, title-bar, title-bar-text, title-bar-controls, window-body, status-bar, field-row, menu-bar, tabs, tree-view, toolbar, address-bar. ' +
+      'Buttons use <button>. Inputs use <input type="text"> or <textarea>. ' +
       'All interactive elements must have unique IDs. ' +
-      'Buttons use <button>, inputs use <input type="text"> or <textarea>. ' +
-      'Do NOT include <script> tags or JavaScript. ' +
-      'Do NOT wrap in markdown code blocks. Return raw HTML only. ' +
-      'This is improv comedy — go with whatever weird app the user asks for, but stay as a Windows XP application.';
+      'Do NOT include <script> tags or JavaScript. Do NOT wrap in markdown. Return raw HTML only. ' +
+      'The window MUST be resizable by the user dragging edges, maximizable to fill the screen, and closable. ' +
+      'This is improv comedy — go with whatever weird app the user asks for, but keep it as a real Windows XP application.';
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'https://api.deepseek.com/chat/completions', true);
