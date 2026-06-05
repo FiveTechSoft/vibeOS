@@ -1,7 +1,0 @@
-*.exe
-*.obj
-*.c
-*.log
-debug.log
-server.log
-*.tmp

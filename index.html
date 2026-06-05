@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeOS — Windows XP</title>
+  <link rel="stylesheet" href="xp.css">
+</head>
+<body>
+<div class="desktop" id="desktop">
+
+  <div class="desktop-icons" id="desktop-icons">
+    <div class="desktop-icon" id="icon-ie" data-action="open-ie">
+      <div class="icon-img">🌐</div><div class="icon-label">Internet Explorer</div>
+    </div>
+    <div class="desktop-icon" id="icon-paint" data-action="open-paint">
+      <div class="icon-img">🎨</div><div class="icon-label">Paint</div>
+    </div>
+    <div class="desktop-icon" id="icon-notepad" data-action="open-notepad">
+      <div class="icon-img">📝</div><div class="icon-label">Notepad</div>
+    </div>
+    <div class="desktop-icon" id="icon-explorer" data-action="open-explorer">
+      <div class="icon-img">📁</div><div class="icon-label">File Explorer</div>
+    </div>
+    <div class="desktop-icon" id="icon-calc" data-action="open-calc">
+      <div class="icon-img">🧮</div><div class="icon-label">Calculator</div>
+    </div>
+    <div class="desktop-icon" id="icon-cmd" data-action="open-cmd">
+      <div class="icon-img">⬛</div><div class="icon-label">Command Prompt</div>
+    </div>
+    <div class="desktop-icon" id="icon-minesweeper" data-action="open-minesweeper">
+      <div class="icon-img">💣</div><div class="icon-label">Minesweeper</div>
+    </div>
+    <div class="desktop-icon" id="icon-wmp" data-action="open-wmp">
+      <div class="icon-img">🎵</div><div class="icon-label">Media Player</div>
+    </div>
+  </div>
+
+  <div id="windows-container"></div>
+
+  <!-- Start Menu -->
+  <div class="start-menu" id="start-menu" style="display:none">
+    <div class="start-header">VibeOS</div>
+    <div class="start-body">
+      <div class="start-left">
+        <div class="start-item" id="start-ie" data-action="open-ie"><span class="start-icon">🌐</span><span>Internet Explorer</span></div>
+        <div class="start-item" id="start-paint" data-action="open-paint"><span class="start-icon">🎨</span><span>Paint</span></div>
+        <div class="start-item" id="start-notepad" data-action="open-notepad"><span class="start-icon">📝</span><span>Notepad</span></div>
+        <div class="start-item" id="start-explorer" data-action="open-explorer"><span class="start-icon">📁</span><span>File Explorer</span></div>
+        <div class="start-item" id="start-calc" data-action="open-calc"><span class="start-icon">🧮</span><span>Calculator</span></div>
+        <div class="start-item" id="start-cmd" data-action="open-cmd"><span class="start-icon">⬛</span><span>Command Prompt</span></div>
+        <div style="border-top:1px solid #ACA899;margin:3px 8px"></div>
+        <div class="start-item" id="start-run" data-action="run"><span class="start-icon">▶</span><span>Run...</span></div>
+      </div>
+      <div class="start-right">
+        <div class="start-item" id="start-logoff"><span class="start-icon">🔒</span><span>Log Off</span></div>
+        <div class="start-item" id="start-shutdown"><span class="start-icon">🔌</span><span>Shut Down</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taskbar -->
+  <div class="taskbar" id="taskbar">
+    <button class="start-btn" id="btn-start">🪟 Start</button>
+    <div class="taskbar-spacer"></div>
+    <div class="system-tray" id="system-tray">🕐 <span id="clock">12:00 PM</span></div>
+  </div>
+
+</div>
+
+<!-- Run Dialog -->
+<div class="dialog-overlay" id="run-overlay" style="display:none"></div>
+<div class="window" id="run-dialog" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;min-width:300px;z-index:10001">
+  <div class="title-bar">
+    <div class="title-bar-text">Run</div>
+    <div class="title-bar-controls"><button class="close-btn" id="run-close">✕</button></div>
+  </div>
+  <div class="window-body" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:24px">▶</span>
+      <span style="font-size:11px">Type the name of a program, folder,<br>document, or Internet resource.</span>
+    </div>
+    <div class="field-row"><label>Open:</label><input type="text" id="run-input" style="flex:1" placeholder="e.g. Notepad, Calculator, or hallucinate anything..."></div>
+    <div id="run-thinking" style="display:none;color:#3168D5;font-size:11px;text-align:center;padding:4px">🧠 DeepSeek is hallucinating your app...</div>
+    <div id="run-error" style="display:none;color:#C00;font-size:11px;text-align:center;padding:4px"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px">
+      <button id="run-ok" class="primary">OK</button>
+      <button id="run-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="xp.js"></script>
+<script src="vibe.js"></script>
+</body>
+</html>

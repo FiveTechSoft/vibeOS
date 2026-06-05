@@ -1,6 +1,0 @@
--std
-vibeos.prg
-hbtip.hbc
-xhb.hbc
-hbct.hbc
--ldflag=/NODEFAULTLIB:msvcrt
