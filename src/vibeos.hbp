@@ -1,0 +1,8 @@
+vibeos.prg
+vibestatic.prg
+vibehtml.prg
+vibesession.prg
+vibedelta.prg
+-cflag=-O2
+-gui=no
+-mt=yes
