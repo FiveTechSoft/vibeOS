@@ -274,6 +274,49 @@
     inp.focus();
   }
 
+  // Media Player
+  var wmpAudio = null;
+  function wmpInit() {
+    if (wmpAudio) { try { wmpAudio.pause(); } catch(e){} }
+    var audio = new Audio();
+    wmpAudio = audio;
+    var viz = document.getElementById('wmp-viz');
+    var titleEl = document.getElementById('wmp-title');
+    var seek = document.getElementById('wmp-seek');
+    var cur = document.getElementById('wmp-cur');
+    var dur = document.getElementById('wmp-dur');
+    var playBtn = document.getElementById('wmp-play');
+    var vol = document.getElementById('wmp-vol');
+    var bars = [];
+    if (viz) { viz.innerHTML = ''; for (var i = 0; i < 24; i++) { var b = document.createElement('div'); b.style.cssText = 'width:8px;height:6px;background:linear-gradient(#6FF,#08F);transition:height .08s'; viz.appendChild(b); bars.push(b); } }
+    var vizTimer = null;
+    function startViz(){ if (vizTimer) return; vizTimer = setInterval(function(){ for (var k = 0; k < bars.length; k++) bars[k].style.height = (6 + Math.random() * 90) + 'px'; }, 90); }
+    function stopViz(){ if (vizTimer) { clearInterval(vizTimer); vizTimer = null; } for (var k = 0; k < bars.length; k++) bars[k].style.height = '6px'; }
+    function fmt(t){ if (!isFinite(t)) return '0:00'; var m = Math.floor(t/60), s = Math.floor(t%60); return m + ':' + (s < 10 ? '0' : '') + s; }
+    function setIcon(){ if (playBtn) playBtn.textContent = audio.paused ? '▶' : '⏸'; }
+    function openFile(){
+      var i = document.createElement('input'); i.type = 'file'; i.accept = 'audio/*,video/*';
+      i.onchange = function(){ var f = i.files[0]; if (!f) return; audio.src = URL.createObjectURL(f); if (titleEl) titleEl.textContent = f.name; audio.play().catch(function(){}); };
+      i.click();
+    }
+    function toggle(){ if (!audio.src) { openFile(); return; } if (audio.paused) audio.play().catch(function(){}); else audio.pause(); }
+    function stop(){ audio.pause(); try { audio.currentTime = 0; } catch(e){} }
+    audio.volume = (vol ? vol.value : 80) / 100;
+    wire('wmp-open', openFile);
+    wire('wmp-exit', function(){ audio.pause(); stopViz(); closeWin('win-wmp'); });
+    wire('wmp-about', function(){ alert('VibeOS Media Player'); });
+    wire('wmp-play', toggle); wire('wmp-m-play', toggle);
+    wire('wmp-stop', stop); wire('wmp-m-stop', stop);
+    audio.onplay = function(){ setIcon(); startViz(); };
+    audio.onpause = function(){ setIcon(); stopViz(); };
+    audio.onended = function(){ setIcon(); stopViz(); };
+    audio.ontimeupdate = function(){ if (cur) cur.textContent = fmt(audio.currentTime); if (seek && audio.duration) seek.value = (audio.currentTime / audio.duration) * 100; };
+    audio.onloadedmetadata = function(){ if (dur) dur.textContent = fmt(audio.duration); };
+    if (seek) seek.oninput = function(){ if (audio.duration) audio.currentTime = (seek.value / 100) * audio.duration; };
+    if (vol) vol.oninput = function(){ audio.volume = vol.value / 100; };
+    setIcon();
+  }
+
   var appRegistry = {
     'open-notepad': {
       title: 'Untitled - Notepad', icon: '📝', w: 700, h: 450,
@@ -508,6 +551,26 @@
         wire('pt-invert', function(){ var d = ctx.getImageData(0,0,cv.width,cv.height); for (var i=0;i<d.data.length;i+=4){ d.data[i]=255-d.data[i]; d.data[i+1]=255-d.data[i+1]; d.data[i+2]=255-d.data[i+2]; } ctx.putImageData(d,0,0); });
         wire('pt-exit', function(){ closeWin('win-paint'); });
       }
+    },
+    'open-wmp': {
+      title: 'Windows Media Player', icon: '🎵', w: 460, h: 420,
+      body: function() {
+        return '<menu-bar><menu-item>File<menu-popup><menu-row id="wmp-open">Open...</menu-row><menu-divider></menu-divider><menu-row id="wmp-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Play<menu-popup><menu-row id="wmp-m-play">Play/Pause</menu-row><menu-row id="wmp-m-stop">Stop</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="wmp-about">About</menu-row></menu-popup></menu-item></menu-bar>' +
+        '<div style="flex:1;display:flex;flex-direction:column;background:#10243E;color:#CFE0F4;padding:8px;gap:8px">' +
+        '<div id="wmp-viz" style="flex:1;display:flex;align-items:flex-end;justify-content:center;gap:3px;min-height:120px;background:#000;border:1px solid #1E3A5F;padding:8px;overflow:hidden"></div>' +
+        '<div id="wmp-title" style="font-size:12px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">No media loaded — File &gt; Open...</div>' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+        '<span id="wmp-cur" style="font-size:11px;font-family:monospace">0:00</span>' +
+        '<input id="wmp-seek" type="range" min="0" max="100" value="0" style="flex:1">' +
+        '<span id="wmp-dur" style="font-size:11px;font-family:monospace">0:00</span></div>' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:6px">' +
+        '<button id="wmp-play" style="min-width:46px">▶</button>' +
+        '<button id="wmp-stop" style="min-width:38px">⏹</button>' +
+        '<span style="margin-left:8px;font-size:13px">🔊</span>' +
+        '<input id="wmp-vol" type="range" min="0" max="100" value="80" style="width:90px"></div>' +
+        '</div>';
+      },
+      onOpen: function() { wmpInit(); }
     },
     'open-ie': {
       title: 'Internet Explorer', icon: '🌐', w: 750, h: 500,
@@ -889,6 +952,7 @@
     var r = parseInt(parts[2]), c = parseInt(parts[3]);
     if (isNaN(r) || isNaN(c) || !msRevealed || !msRevealed[r]) return;
     msReveal(r, c);
+    msUpdateDisplay();
     e.stopPropagation();
   });
 
