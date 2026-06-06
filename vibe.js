@@ -299,7 +299,7 @@
       else if (cmd === 'help') out = 'For more information on a specific command, type the command name.\n\nCLS DIR CD ECHO VER DATE TIME WHOAMI TYPE COLOR TITLE MKDIR\nNOTEPAD CALC PAINT EXPLORER START EXIT';
       else if (cmd === 'cls') { term.textContent = ''; return ''; }
       else if (cmd === 'echo') out = /^off$/i.test(arg) ? 'ECHO is off.' : (arg || 'ECHO is on.');
-      else if (cmd === 'ver') out = '\nMicrosoft Windows XP [Version 5.1.2601]';
+      else if (cmd === 'ver') out = '\nvibeOS v1.0';
       else if (cmd === 'whoami') out = 'vibeos\\user';
       else if (cmd === 'date') out = 'The current date is: ' + new Date().toDateString();
       else if (cmd === 'time') out = 'The current time is: ' + new Date().toLocaleTimeString();
@@ -602,7 +602,7 @@
       body: function() {
         return '<div id="cmd-term" contenteditable="true" spellcheck="false" autocorrect="off" autocapitalize="off" ' +
         'style="flex:1;font-family:Consolas,monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;background:#000;color:#C0C0C0;padding:6px 8px;outline:none;line-height:1.4;caret-color:#C0C0C0" ' +
-        '>Microsoft Windows XP [Version 5.1.2601]\n(C) Copyright 1985-2001 Microsoft Corp.\n\n</div>';
+        '>vibeOS v1.0\n\n</div>';
       },
       onOpen: function() { cmdInit(); }
     },
