@@ -65,9 +65,9 @@
     var html = buildWindowShell(winId, info.title, info.icon, info.body(), info.w, info.h);
     applyDelta({ id: 'windows-container', op: 'append', html: html });
     setTimeout(function() {
-      centerWindow(winId);
       if (info.onOpen) info.onOpen();
-    }, 50);
+      centerWindow(winId);
+    }, 80);
   }
 
   function openHallucinatedWindow(title, bodyHTML) {
@@ -361,7 +361,9 @@
     var el = e.target.closest('[id]');
     if (!el) return;
     var id = el.id;
+    // Skip system elements and minesweeper cells
     if (id === 'btn-start' || id === 'start-menu') return;
+    if (id && id.indexOf('ms-c-') === 0) return; // minesweeper cells
     if (id === 'start-run') { showRunDialog(); return; }
 
     var action = el.getAttribute('data-action');
@@ -370,7 +372,6 @@
         openWindow(action, appRegistry[action]);
         if (id.indexOf('start-') === 0) document.getElementById('start-menu').style.display = 'none';
       } else {
-        // Unknown app — pre-fill Run dialog and hallucinate
         var label = (el.textContent || '').trim();
         if (label) {
           document.getElementById('run-input').value = label;
@@ -436,9 +437,10 @@
     msGrid = []; msRevealed = []; msFlagged = [];
     msMineCount = mines; msGameOver = false; msTimer = 0;
     if (msTimerId) clearInterval(msTimerId);
-    // Place mines
+    // Init arrays
     var i, j, m = 0;
     for (i = 0; i < rows; i++) { msGrid[i] = []; msRevealed[i] = []; msFlagged[i] = []; for (j = 0; j < cols; j++) { msGrid[i][j] = 0; msRevealed[i][j] = false; msFlagged[i][j] = false; } }
+    // Place mines
     while (m < mines) {
       var r = Math.floor(Math.random() * rows), c = Math.floor(Math.random() * cols);
       if (msGrid[r][c] !== -1) { msGrid[r][c] = -1; m++; }
@@ -453,11 +455,26 @@
       }
       msGrid[i][j] = count;
     }
-    msRenderAll();
+    msUpdateDisplay();
     // Timer
+    if (msTimerId) clearInterval(msTimerId);
     msTimerId = setInterval(function() {
       if (!msGameOver) { msTimer++; msUpdateDisplay(); }
     }, 1000);
+  }
+
+  function msResetGame() {
+    var grid = document.getElementById('ms-grid');
+    if (!grid) return;
+    // Generate cells if needed
+    if (!document.getElementById('ms-c-0-0')) {
+      var h = '';
+      for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) {
+        h += '<button id="ms-c-'+i+'-'+j+'" style="width:20px;height:20px;padding:0;min-height:0;font-size:11px;line-height:18px;text-align:center;border:2px outset #FFF;background:#C0C0C0;font-family:Tahoma,sans-serif"></button>';
+      }
+      grid.innerHTML = h;
+    }
+    msInit(9, 9, 10);
   }
 
   function msReveal(r, c) {
@@ -465,17 +482,20 @@
     msRevealed[r][c] = true;
     if (msGrid[r][c] === -1) { msLose(); return; }
     if (msGrid[r][c] === 0) {
+      var rows = msGrid.length, cols = msGrid[0].length;
       for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) {
         var ni = r+dr, nj = c+dc;
-        if (ni>=0 && ni<9 && nj>=0 && nj<9) msReveal(ni, nj);
+        if (ni>=0 && ni<rows && nj>=0 && nj<cols) msReveal(ni, nj);
       }
     }
     msCheckWin();
   }
 
   function msCheckWin() {
+    if (!msGrid.length) return;
+    var rows = msGrid.length, cols = msGrid[0].length;
     var won = true;
-    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) {
+    for (var i = 0; i < rows; i++) for (var j = 0; j < cols; j++) {
       if (!msRevealed[i][j] && msGrid[i][j] !== -1) { won = false; break; }
     }
     if (won) { msGameOver = true; if (msTimerId) clearInterval(msTimerId); msUpdateDisplay(); }
@@ -483,21 +503,28 @@
 
   function msLose() {
     msGameOver = true; if (msTimerId) clearInterval(msTimerId);
-    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) msRevealed[i][j] = true;
+    if (!msGrid.length) return;
+    var rows = msGrid.length, cols = msGrid[0].length;
+    for (var i = 0; i < rows; i++) for (var j = 0; j < cols; j++) msRevealed[i][j] = true;
     msUpdateDisplay();
   }
 
   function msUpdateDisplay() {
+    if (!msGrid.length) return;
+    var rows = msGrid.length, cols = msGrid[0].length;
     var face = document.getElementById('ms-face');
     var minesEl = document.getElementById('ms-mines');
     var timerEl = document.getElementById('ms-timer');
-    var won = msGameOver && !msGrid.some(function(r,i) { return r.some(function(c,j) { return c===-1 && !msFlagged[i][j]; }); });
+    var won = msGameOver;
+    for (var i = 0; i < rows && won; i++) for (var j = 0; j < cols; j++) {
+      if (msGrid[i][j] === -1 && !msFlagged[i][j]) { won = false; }
+    }
     if (face) face.textContent = msGameOver ? (won ? '😎' : '💀') : '🙂';
     if (minesEl) minesEl.textContent = String('000' + msMineCount).slice(-3);
     if (timerEl) timerEl.textContent = String('000' + Math.min(msTimer, 999)).slice(-3);
 
     var colors = ['','#0000FF','#008000','#FF0000','#000080','#800000','#008080','#000','#808080'];
-    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) {
+    for (var i = 0; i < rows; i++) for (var j = 0; j < cols; j++) {
       var cell = document.getElementById('ms-c-'+i+'-'+j);
       if (!cell) continue;
       if (msRevealed[i][j]) {
@@ -518,14 +545,7 @@
   }
 
   function msRenderAll() {
-    var grid = document.getElementById('ms-grid');
-    if (!grid) return;
-    var html = '';
-    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) {
-      html += '<button id="ms-c-'+i+'-'+j+'" style="width:20px;height:20px;padding:0;min-height:0;font-size:11px;line-height:18px;text-align:center;border:2px outset #FFF;background:#C0C0C0;font-family:Tahoma,sans-serif"></button>';
-    }
-    grid.innerHTML = html;
-    msInit(9, 9, 10);
+    msResetGame();
   }
 
   // Minesweeper click handler (delegated)
@@ -556,9 +576,9 @@
     var el = e.target.closest('[id]');
     if (!el) return;
     if (el.id === 'ms-new' || el.id === 'ms-beginner' || el.id === 'ms-face') {
-      msInit(9, 9, 10); e.stopPropagation();
+      msResetGame(); e.stopPropagation();
     }
-    if (el.id === 'ms-intermediate') { /* 16x16 if we resize */ msInit(9, 9, 10); e.stopPropagation(); }
+    if (el.id === 'ms-intermediate') { msResetGame(); e.stopPropagation(); }
   });
   // ================================================================
   var ctxMenu = document.getElementById('desktop-menu');
