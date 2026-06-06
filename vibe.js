@@ -198,6 +198,15 @@
   // ================================================================
   // App Bodies (content only, no window shell)
   // ================================================================
+  // Shared helpers for wiring built-in apps
+  function wire(id, fn) { var el = document.getElementById(id); if (el) el.onclick = fn; }
+  function closeWin(winId) { var w = document.getElementById(winId); if (w) w.remove(); }
+  function insertAtCursor(ta, text) {
+    var s = ta.selectionStart, e = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + text + ta.value.slice(e);
+    ta.selectionStart = ta.selectionEnd = s + text.length;
+  }
+
   var appRegistry = {
     'open-notepad': {
       title: 'Untitled - Notepad', icon: '📝', w: 700, h: 450,
@@ -208,6 +217,29 @@
         '<menu-item>Edit<menu-popup><menu-row id="np-undo">Undo</menu-row><menu-row id="np-cut">Cut</menu-row>' +
         '<menu-row id="np-copy">Copy</menu-row><menu-row id="np-paste">Paste</menu-row></menu-popup></menu-item></menu-bar>' +
         '<textarea id="np-textarea" style="flex:1;border:none;resize:none;font-family:Consolas,monospace;font-size:13px;padding:4px" rows="20"></textarea>';
+      },
+      onOpen: function() {
+        var ta = document.getElementById('np-textarea');
+        if (!ta) return;
+        function download() {
+          var b = new Blob([ta.value], { type: 'text/plain' });
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(b); a.download = 'Untitled.txt'; a.click();
+          setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+        }
+        wire('np-new', function(){ ta.value = ''; ta.focus(); });
+        wire('np-open', function(){
+          var i = document.createElement('input'); i.type = 'file'; i.accept = '.txt,text/*';
+          i.onchange = function(){ var f = i.files[0]; if (!f) return; var r = new FileReader(); r.onload = function(){ ta.value = r.result; }; r.readAsText(f); };
+          i.click();
+        });
+        wire('np-save', download); wire('np-saveas', download);
+        wire('np-exit', function(){ closeWin('win-notepad'); });
+        wire('np-undo', function(){ ta.focus(); document.execCommand('undo'); });
+        wire('np-cut',  function(){ ta.focus(); document.execCommand('cut'); });
+        wire('np-copy', function(){ ta.focus(); document.execCommand('copy'); });
+        wire('np-paste', function(){ ta.focus(); if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(function(t){ insertAtCursor(ta, t); }).catch(function(){}); });
+        ta.focus();
       }
     },
     'open-calc': {
@@ -222,6 +254,39 @@
         '<button id="calc-4">4</button><button id="calc-5">5</button><button id="calc-6">6</button><button id="calc-mul">*</button>' +
         '<button id="calc-1">1</button><button id="calc-2">2</button><button id="calc-3">3</button><button id="calc-sub">-</button>' +
         '<button id="calc-0">0</button><button id="calc-dot">.</button><button id="calc-eq">=</button><button id="calc-add">+</button></div>';
+      },
+      onOpen: function() {
+        var disp = document.getElementById('calc-display');
+        if (!disp) return;
+        var cur = '0', prev = null, op = null, fresh = true, mem = 0;
+        function show(){ disp.value = cur; }
+        function inp(d){
+          if (fresh) { cur = (d === '.') ? '0.' : d; fresh = false; }
+          else { if (d === '.' && cur.indexOf('.') >= 0) return; cur = (cur === '0' && d !== '.') ? d : cur + d; }
+          show();
+        }
+        function calc(){
+          var b = parseFloat(cur), r = prev;
+          if (op === '+') r += b; else if (op === '-') r -= b;
+          else if (op === '*') r *= b; else if (op === '/') r = b ? r / b : NaN;
+          return r;
+        }
+        function setOp(o){ if (op !== null && !fresh) { cur = String(+calc().toFixed(10)); show(); } prev = parseFloat(cur); op = o; fresh = true; }
+        function equals(){ if (op === null || prev === null) return; cur = String(+calc().toFixed(10)); op = null; prev = null; fresh = true; show(); }
+        for (var d = 0; d <= 9; d++) (function(n){ wire('calc-' + n, function(){ inp(String(n)); }); })(d);
+        wire('calc-dot', function(){ inp('.'); });
+        wire('calc-add', function(){ setOp('+'); }); wire('calc-sub', function(){ setOp('-'); });
+        wire('calc-mul', function(){ setOp('*'); }); wire('calc-div', function(){ setOp('/'); });
+        wire('calc-eq', equals);
+        wire('calc-c',  function(){ cur='0'; prev=null; op=null; fresh=true; show(); });
+        wire('calc-ce', function(){ cur='0'; fresh=true; show(); });
+        wire('calc-back', function(){ cur = cur.length > 1 ? cur.slice(0,-1) : '0'; if (cur==='') cur='0'; show(); });
+        wire('calc-plusminus', function(){ cur = String(parseFloat(cur) * -1); show(); });
+        wire('calc-mc', function(){ mem = 0; });
+        wire('calc-mr', function(){ cur = String(mem); fresh = true; show(); });
+        wire('calc-ms', function(){ mem = parseFloat(cur); });
+        wire('calc-mplus', function(){ mem += parseFloat(cur); });
+        show();
       }
     },
     'open-explorer': {
@@ -241,6 +306,24 @@
         '<div class="desktop-icon" style="color:#000;width:80px"><span style="font-size:32px">📄</span>readme.txt</div>' +
         '<div class="desktop-icon" style="color:#000;width:80px"><span style="font-size:32px">📊</span>budget.xls</div>' +
         '<div class="desktop-icon" style="color:#000;width:80px"><span style="font-size:32px">🖼️</span>photo.jpg</div></div></div></div>';
+      },
+      onOpen: function() {
+        var win = document.getElementById('win-explorer');
+        if (!win) return;
+        function status(t){ var s = win.querySelector('.status-bar-field'); if (s) s.textContent = t; }
+        // tree expand/collapse handled globally in xp.js; just show pointer affordance
+        win.querySelectorAll('.tree-view li').forEach(function(li){ if (li.querySelector(':scope > ul')) li.style.cursor = 'pointer'; });
+        win.querySelectorAll('.desktop-icon').forEach(function(ic){
+          ic.style.cursor = 'pointer';
+          ic.addEventListener('click', function(){ status('Selected: ' + (ic.textContent || '').trim()); });
+          ic.addEventListener('dblclick', function(){
+            var name = (ic.textContent || '').trim();
+            if (/\.txt/i.test(name)) {
+              openWindow('open-notepad', appRegistry['open-notepad']);
+              setTimeout(function(){ var ta = document.getElementById('np-textarea'); if (ta) ta.value = 'This is ' + name + '\r\n\r\nA sample document on the VibeOS desktop.'; }, 120);
+            } else { status('Cannot open ' + name + ' — no associated program'); }
+          });
+        });
       }
     },
     'open-cmd': {
@@ -318,6 +401,44 @@
         '<div style="width:20px;height:18px;background:#FFA500;margin:1px"></div>' +
         '<div style="width:20px;height:18px;background:#A52A2A;margin:1px"></div>' +
         '</div></div></div>';
+      },
+      onOpen: function() {
+        var host = document.getElementById('pt-canvas');
+        if (!host) return;
+        host.innerHTML = '';
+        var cv = document.createElement('canvas');
+        cv.width = host.clientWidth || 600; cv.height = host.clientHeight || 360;
+        cv.style.cssText = 'display:block;cursor:crosshair;background:#fff';
+        host.appendChild(cv);
+        var ctx = cv.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+        var tool = 'pencil', color = '#000', drawing = false;
+        function sizeFor(){ return tool === 'brush' ? 4 : tool === 'eraser' ? 14 : 1; }
+        function strokeColor(){ return tool === 'eraser' ? '#fff' : color; }
+        function pos(e){ var r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+        cv.addEventListener('mousedown', function(e){
+          if (tool === 'fill') { ctx.fillStyle = color; ctx.fillRect(0, 0, cv.width, cv.height); return; }
+          drawing = true; var p = pos(e);
+          ctx.strokeStyle = strokeColor(); ctx.lineWidth = sizeFor(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          ctx.beginPath(); ctx.moveTo(p.x, p.y);
+        });
+        cv.addEventListener('mousemove', function(e){ if (!drawing) return; var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+        window.addEventListener('mouseup', function(){ drawing = false; });
+        // tools
+        var toolMap = { 'pt-tool-pencil':'pencil', 'pt-tool-brush':'brush', 'pt-tool-eraser':'eraser', 'pt-tool-fill':'fill' };
+        Object.keys(toolMap).forEach(function(id){ wire(id, function(){ tool = toolMap[id]; }); });
+        // color palette
+        var win = document.getElementById('win-paint');
+        var palette = win && Array.prototype.slice.call(win.querySelectorAll('div')).filter(function(d){ return /flex-wrap:wrap/.test(d.getAttribute('style') || ''); })[0];
+        if (palette) Array.prototype.slice.call(palette.children).forEach(function(sw){
+          var bg = (sw.style.background || sw.style.backgroundColor);
+          if (!bg) return;
+          sw.style.cursor = 'pointer';
+          sw.addEventListener('click', function(){ color = bg; if (tool === 'eraser' || tool === 'fill') {} });
+        });
+        wire('pt-new', function(){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); });
+        wire('pt-invert', function(){ var d = ctx.getImageData(0,0,cv.width,cv.height); for (var i=0;i<d.data.length;i+=4){ d.data[i]=255-d.data[i]; d.data[i+1]=255-d.data[i+1]; d.data[i+2]=255-d.data[i+2]; } ctx.putImageData(d,0,0); });
+        wire('pt-exit', function(){ closeWin('win-paint'); });
       }
     },
     'open-ie': {
