@@ -7,8 +7,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 body {
   margin: 0; padding: 0;
-  background: #3A6EA5;
-  font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  background: var(--desktop-bg);
+  font-family: var(--font-family);
   font-size: 11px;
   color: #000;
   overflow: hidden;
@@ -23,10 +23,62 @@ input, textarea, [contenteditable] {
   user-select: text;
 }
 
+/* === Theme Variables (default: Windows XP) === */
+body.theme-windows, body:not([class*="theme-"]) {
+  --desktop-bg: #3A6EA5;
+  --taskbar-bg: linear-gradient(to bottom, #3168D5 0%, #4993E6 2%, #3168D5 3%, #2156C0 100%);
+  --taskbar-border: #5599EE;
+  --start-btn-bg: linear-gradient(to bottom, #3C9A3C 0%, #5CBF5C 50%, #3C9A3C 51%, #2D8A2D 100%);
+  --window-border: 2px solid #0054E3;
+  --titlebar-bg: linear-gradient(to bottom, #0A246A 0%, #3A6EA5 3%, #2C5C9A 10%, #1E4A8A 100%);
+  --titlebar-text: white;
+  --window-bg: #ECE9D8;
+  --button-bg: #ECE9D8;
+  --button-border: #ACA899;
+  --menu-hover: #3168D5;
+  --font-family: 'Tahoma', 'Segoe UI', sans-serif;
+  --border-radius-title: 8px 8px 0 0;
+  --window-shadow: 2px 2px 10px rgba(0,0,0,0.35);
+}
+
+body.theme-mac {
+  --desktop-bg: #808080;
+  --taskbar-bg: #DDDDDD;
+  --taskbar-border: #999;
+  --start-btn-bg: #DDDDDD;
+  --window-border: 1px solid #000;
+  --titlebar-bg: #FFFFFF;
+  --titlebar-text: #000;
+  --window-bg: #FFFFFF;
+  --button-bg: #DDDDDD;
+  --button-border: #666;
+  --menu-hover: #000080;
+  --font-family: 'Chicago', 'Charcoal', 'Tahoma', sans-serif;
+  --border-radius-title: 4px 4px 0 0;
+  --window-shadow: 1px 1px 0 #000, 2px 2px 0 #000;
+}
+
+body.theme-lisa {
+  --desktop-bg: #D4D0C8;
+  --taskbar-bg: #C0C0C0;
+  --taskbar-border: #888;
+  --start-btn-bg: #C0C0C0;
+  --window-border: 2px solid #555;
+  --titlebar-bg: #E8E8E8;
+  --titlebar-text: #000;
+  --window-bg: #F0F0F0;
+  --button-bg: #E0E0E0;
+  --button-border: #888;
+  --menu-hover: #555;
+  --font-family: 'Geneva', 'Tahoma', sans-serif;
+  --border-radius-title: 6px 6px 0 0;
+  --window-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+}
+
 /* === Desktop === */
 .desktop {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: #3A6EA5;
+  background: var(--desktop-bg);
   display: flex; flex-direction: column;
 }
 
@@ -34,17 +86,32 @@ input, textarea, [contenteditable] {
 .taskbar {
   display: flex; align-items: center;
   height: 30px; min-height: 30px;
-  background: linear-gradient(to bottom, #3168D5 0%, #4993E6 2%, #3168D5 3%, #2156C0 100%);
+  background: var(--taskbar-bg);
   padding: 2px 4px; gap: 4px;
-  border-top: 1px solid #5599EE;
+  border-top: 1px solid var(--taskbar-border);
 }
 .taskbar .start-btn {
   height: 24px; padding: 0 10px;
-  background: linear-gradient(to bottom, #3C9A3C 0%, #5CBF5C 50%, #3C9A3C 51%, #2D8A2D 100%);
+  background: var(--start-btn-bg);
   border: none; border-radius: 0 8px 8px 0;
   color: white; font-weight: bold; font-size: 11px;
   cursor: pointer;
   display: flex; align-items: center; gap: 4px;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+}
+body.theme-mac .taskbar .start-btn,
+body.theme-lisa .taskbar .start-btn {
+  color: #000;
+  text-shadow: none;
+}
+body.theme-mac .taskbar .system-tray,
+body.theme-lisa .taskbar .system-tray {
+  color: #000;
+}
+body.theme-mac .desktop-icon,
+body.theme-lisa .desktop-icon {
+  color: #000;
+  text-shadow: none;
 }
 .taskbar .start-btn:hover { filter: brightness(1.1); }
 .taskbar .taskbar-spacer { flex: 1; }
@@ -75,10 +142,10 @@ input, textarea, [contenteditable] {
 /* === Windows === */
 .window {
   position: fixed; min-width: 300px; min-height: 200px;
-  background: #ECE9D8;
-  border: 2px solid #0054E3;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 2px 2px 10px rgba(0,0,0,0.35);
+  background: var(--window-bg);
+  border: var(--window-border);
+  border-radius: var(--border-radius-title);
+  box-shadow: var(--window-shadow);
   display: flex; flex-direction: column;
   overflow: hidden;
 }
@@ -91,8 +158,8 @@ input, textarea, [contenteditable] {
 /* === Title Bar === */
 .title-bar {
   display: flex; align-items: center;
-  background: linear-gradient(to bottom, #0A246A 0%, #3A6EA5 3%, #2C5C9A 10%, #1E4A8A 100%);
-  color: white; padding: 3px 5px 3px 8px;
+  background: var(--titlebar-bg);
+  color: var(--titlebar-text); padding: 3px 5px 3px 8px;
   font-size: 12px; font-weight: bold;
   cursor: default; min-height: 28px;
   user-select: none; gap: 4px;
@@ -126,7 +193,7 @@ menu-bar {
 menu-item {
   position: relative; padding: 2px 8px; cursor: pointer;
 }
-menu-item:hover { background: #3168D5; color: white; }
+menu-item:hover { background: var(--menu-hover); color: white; }
 menu-popup {
   display: none; position: absolute; top: 100%; left: 0;
   background: #FFFFFF; border: 1px solid #ACA899;
@@ -139,7 +206,7 @@ menu-row {
   cursor: pointer; font-size: 11px; gap: 6px;
   white-space: nowrap;
 }
-menu-row:hover { background: #3168D5; color: white; }
+menu-row:hover { background: var(--menu-hover); color: white; }
 menu-divider {
   display: block; height: 1px; background: #ACA899; margin: 3px 2px;
 }
@@ -168,7 +235,7 @@ menu-divider {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 12px; cursor: pointer; font-size: 12px;
 }
-.start-menu .start-item:hover { background: #3168D5; color: white; }
+.start-menu .start-item:hover { background: var(--menu-hover); color: white; }
 .start-menu .start-item .start-icon { font-size: 20px; width: 24px; text-align: center; }
 
 /* === Tabs === */
@@ -208,9 +275,9 @@ ul.tree-view li.expanded::before {
 
 /* === Buttons (XP style) === */
 button {
-  background: #ECE9D8; border: 1px solid #ACA899;
+  background: var(--button-bg); border: 1px solid var(--button-border);
   padding: 4px 16px; font-size: 11px; cursor: pointer;
-  border-radius: 3px; font-family: 'Tahoma', sans-serif;
+  border-radius: 3px; font-family: var(--font-family);
   min-height: 23px;
 }
 button:hover { border-color: #7A8A9A; }
@@ -316,7 +383,7 @@ div[role="progressbar"]::after {
 .context-menu .context-item {
   padding: 3px 16px; cursor: pointer; font-size: 11px;
 }
-.context-menu .context-item:hover { background: #3168D5; color: white; }
+.context-menu .context-item:hover { background: var(--menu-hover); color: white; }
 
 /* === Dialog Overlay === */
 .dialog-overlay {

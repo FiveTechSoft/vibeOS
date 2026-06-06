@@ -332,9 +332,32 @@
   });
 
   // ================================================================
+  // Theme Management
+  // ================================================================
+  var currentTheme = 'windows';
+  try { currentTheme = localStorage.getItem('vibeos_theme') || 'windows'; } catch(e) {}
+  function applyTheme(name) {
+    document.body.className = document.body.className.replace(/theme-\w+/g, '');
+    if (name !== 'windows') document.body.classList.add('theme-' + name);
+    currentTheme = name;
+    try { localStorage.setItem('vibeos_theme', name); } catch(e) {}
+    // Update checkmark
+    var items = document.querySelectorAll('#style-submenu .context-item');
+    for (var i = 0; i < items.length; i++) {
+      items[i].style.fontWeight = (items[i].getAttribute('data-theme') === name) ? 'bold' : 'normal';
+    }
+  }
+  if (currentTheme !== 'windows') {
+    document.body.classList.add('theme-' + currentTheme);
+  }
+
+  // ================================================================
   // Desktop Right-Click Context Menu
   // ================================================================
   var ctxMenu = document.getElementById('desktop-menu');
+  var styleSub = document.getElementById('style-submenu');
+  var styleHover = false, subHover = false;
+
   document.addEventListener('contextmenu', function(e) {
     var onDesktop = e.target.closest('.desktop') && !e.target.closest('.window');
     if (!onDesktop) return;
@@ -347,12 +370,44 @@
       var r = ctxMenu.getBoundingClientRect();
       if (r.right  > window.innerWidth)  ctxMenu.style.left = (e.clientX - r.width) + 'px';
       if (r.bottom > window.innerHeight) ctxMenu.style.top  = (e.clientY - r.height) + 'px';
+      if (styleSub) styleSub.style.display = 'none';
+      applyTheme(currentTheme); // refresh checkmarks
     }
   });
 
+  // Style submenu hover behavior
+  if (ctxMenu) {
+    ctxMenu.addEventListener('mouseover', function(e) {
+      var styleItem = e.target.closest('#ctx-style');
+      if (styleItem && styleSub) { styleSub.style.display = 'block'; styleHover = true; }
+    });
+    ctxMenu.addEventListener('mouseout', function(e) {
+      if (e.target.closest('#ctx-style') || e.target.closest('#style-submenu')) return;
+      if (styleSub) styleSub.style.display = 'none';
+    });
+  }
+  if (styleSub) {
+    styleSub.addEventListener('mouseover', function() { subHover = true; });
+    styleSub.addEventListener('mouseout', function() {
+      subHover = false;
+      setTimeout(function() { if (!styleHover && !subHover && styleSub) styleSub.style.display = 'none'; }, 100);
+    });
+  }
+
   document.addEventListener('click', function(e) {
+    // Handle Style submenu theme selection
+    var themeItem = e.target.closest('#style-submenu .context-item');
+    if (themeItem) {
+      var theme = themeItem.getAttribute('data-theme');
+      if (theme) applyTheme(theme);
+      if (ctxMenu) ctxMenu.style.display = 'none';
+      if (styleSub) styleSub.style.display = 'none';
+      return;
+    }
+
     if (!e.target.closest('#desktop-menu')) {
       if (ctxMenu) ctxMenu.style.display = 'none';
+      if (styleSub) styleSub.style.display = 'none';
     }
     // Handle context menu item clicks
     if (e.target.closest('#desktop-menu .context-item')) {
@@ -375,7 +430,7 @@
       }
       else if (action && appRegistry[action]) { openWindow(action, appRegistry[action]); }
 
-      if (ctxMenu) ctxMenu.style.display = 'none';
+      if (ctxMenu && !e.target.closest('#ctx-style')) ctxMenu.style.display = 'none';
     }
   });
 
