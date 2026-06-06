@@ -179,6 +179,68 @@ body.theme-lisa .desktop-icon {
 .title-bar-controls button.close-btn { background: #C75000; }
 .title-bar-controls button.close-btn:hover { background: #E05000; }
 
+/* === Mac OS window buttons (traffic light, left side) === */
+body.theme-mac .title-bar {
+  flex-direction: row-reverse;
+  background: linear-gradient(to bottom, #F0F0F0 0%, #D0D0D0 100%);
+  padding: 4px 8px;
+}
+body.theme-mac .title-bar .title-bar-text {
+  text-align: center;
+  font-size: 11px;
+  font-weight: normal;
+  letter-spacing: 0.5px;
+}
+body.theme-mac .title-bar-controls {
+  order: -1;
+  gap: 6px;
+  padding-right: 4px;
+}
+body.theme-mac .title-bar-controls button {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: none;
+  font-size: 0;
+  line-height: 0;
+  min-height: 0;
+  background: #CCCCCC;
+  padding: 0;
+}
+body.theme-mac .title-bar-controls button:hover {
+  filter: none;
+  font-size: 8px;
+  line-height: 12px;
+  text-align: center;
+  color: rgba(0,0,0,0.5);
+}
+body.theme-mac .title-bar-controls button.close-btn {
+  background: #FF5F57;
+  order: 0;
+}
+body.theme-mac .title-bar-controls button.close-btn:hover { background: #FF3B30; }
+body.theme-mac .title-bar-controls button.min-btn {
+  background: #FFBD2E;
+  order: 1;
+}
+body.theme-mac .title-bar-controls button.min-btn:hover { background: #FF9F0A; }
+body.theme-mac .title-bar-controls button.max-btn {
+  background: #28CA41;
+  order: 2;
+}
+body.theme-mac .title-bar-controls button.max-btn:hover { background: #00B31A; }
+
+/* Show ✕ ─ □ on hover for Mac buttons */
+body.theme-mac .title-bar-controls button.close-btn:hover::after { content: '✕'; }
+body.theme-mac .title-bar-controls button.min-btn:hover::after   { content: '─'; }
+body.theme-mac .title-bar-controls button.max-btn:hover::after   { content: '□'; }
+
+/* Lisa — subtle window controls */
+body.theme-lisa .title-bar-controls button {
+  background: #D0D0D0;
+  border: 1px solid #999;
+}
+body.theme-lisa .title-bar-controls button.close-btn { background: #CC9999; }
+
 /* === Window Body === */
 .window-body {
   flex: 1; overflow: auto; padding: 8px;

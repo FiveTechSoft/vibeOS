@@ -341,10 +341,12 @@
     if (name !== 'windows') document.body.classList.add('theme-' + name);
     currentTheme = name;
     try { localStorage.setItem('vibeos_theme', name); } catch(e) {}
-    // Update checkmark
+    // Update active indicator: bold + checkmark prefix
     var items = document.querySelectorAll('#style-submenu .context-item');
     for (var i = 0; i < items.length; i++) {
-      items[i].style.fontWeight = (items[i].getAttribute('data-theme') === name) ? 'bold' : 'normal';
+      var t = items[i].getAttribute('data-theme');
+      var label = items[i].textContent.replace(/^[✓●] /, '');
+      items[i].textContent = (t === name ? '● ' : '  ') + label;
     }
   }
   if (currentTheme !== 'windows') {
