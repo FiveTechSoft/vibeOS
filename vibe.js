@@ -317,6 +317,39 @@
     setIcon();
   }
 
+  // Internet Explorer — real fetch via CORS proxy, rendered in sandboxed iframe
+  function ieInit() {
+    var addr = document.getElementById('ie-addr');
+    var frame = document.getElementById('ie-content');
+    if (!addr || !frame) return;
+    var hist = [], pos = -1;
+    function normalize(u){ u = (u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) u = 'http://' + u; return u; }
+    function show(html, base){ frame.srcdoc = '<base href="' + base + '"><base target="_blank">' + html; }
+    function load(raw, push){
+      var url = normalize(raw);
+      if (!url) return;
+      addr.value = url;
+      frame.srcdoc = '<div style="font-family:Tahoma;padding:20px;color:#444">⏳ Loading ' + url + ' …</div>';
+      var prox = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+      fetch(prox).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(function(html){ show(html, url); })
+        .catch(function(e){ frame.srcdoc = '<div style="font-family:Tahoma;padding:24px"><h2 style="color:#C00">Cannot display the webpage</h2><p>' + url + '</p><p style="color:#888">' + e.message + ' — the CORS proxy may be down or the site refused the request.</p></div>'; });
+      if (push) { hist = hist.slice(0, pos + 1); hist.push(url); pos = hist.length - 1; }
+    }
+    document.getElementById('ie-go').onclick = function(){ load(addr.value, true); };
+    addr.addEventListener('keydown', function(e){ if (e.key === 'Enter') load(addr.value, true); });
+    document.getElementById('ie-back').onclick = function(){ if (pos > 0) { pos--; load(hist[pos], false); } };
+    document.getElementById('ie-fwd').onclick = function(){ if (pos < hist.length - 1) { pos++; load(hist[pos], false); } };
+    document.getElementById('ie-refresh').onclick = function(){ if (hist[pos]) load(hist[pos], false); };
+    var stopBtn = document.getElementById('ie-stop');
+    if (stopBtn) stopBtn.onclick = function(){ frame.srcdoc = ''; };
+    wire('ie-fav-google', function(){ load('https://www.google.com', true); });
+    wire('ie-fav-msn', function(){ load('https://www.msn.com', true); });
+    wire('ie-about', function(){ alert('VibeOS Internet Explorer 6.0'); });
+    wire('ie-close', function(){ closeWin('win-ie'); });
+    load(addr.value, true);
+  }
+
   var appRegistry = {
     'open-notepad': {
       title: 'Untitled - Notepad', icon: '📝', w: 700, h: 450,
@@ -581,14 +614,12 @@
         '<menu-item>Edit<menu-popup><menu-row id="ie-cut">Cut</menu-row><menu-row id="ie-copy">Copy</menu-row><menu-row id="ie-paste">Paste</menu-row></menu-popup></menu-item>' +
         '<menu-item>Favorites<menu-popup><menu-row id="ie-fav-google">⭐ Google</menu-row><menu-row id="ie-fav-msn">⭐ MSN</menu-row></menu-popup></menu-item>' +
         '<menu-item>Help<menu-popup><menu-row id="ie-about">About Internet Explorer</menu-row></menu-popup></menu-item></menu-bar>' +
-        '<div class="toolbar"><button>🔙</button><button>🔜</button><button>⏹</button><button>🔄</button>' +
+        '<div class="toolbar"><button id="ie-back">🔙</button><button id="ie-fwd">🔜</button><button id="ie-stop">⏹</button><button id="ie-refresh">🔄</button>' +
         '<span class="toolbar-separator"></span><span style="font-size:11px">Address:</span>' +
-        '<input type="text" value="http://www.google.com" style="flex:1"></div>' +
-        '<div style="flex:1;padding:8px;background:#FFFFFF;overflow:auto">' +
-        '<h2 style="color:#0000CC;margin-top:0">Welcome to the World Wide Web!</h2>' +
-        '<p>This is Internet Explorer 6.0 running inside VibeOS.</p>' +
-        '<hr><small style="color:#888">AI-hallucinated content — anything is possible</small></div>';
-      }
+        '<input id="ie-addr" type="text" value="http://example.com" style="flex:1"><button id="ie-go">Go</button></div>' +
+        '<iframe id="ie-content" sandbox="allow-same-origin allow-popups" style="flex:1;border:none;background:#FFF;width:100%"></iframe>';
+      },
+      onOpen: function() { ieInit(); }
     }
   };
 
