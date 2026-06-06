@@ -207,6 +207,73 @@
     ta.selectionStart = ta.selectionEnd = s + text.length;
   }
 
+  // Command Prompt interpreter
+  function cmdInit() {
+    var out = document.getElementById('cmd-output');
+    var inp = document.getElementById('cmd-input');
+    var promptEl = document.getElementById('cmd-prompt');
+    if (!out || !inp) return;
+    var cwd = 'C:\\Documents and Settings\\User';
+    var fs = {
+      'C:\\Documents and Settings\\User': ['My Documents <DIR>', 'Desktop <DIR>', 'readme.txt', 'budget.xls', 'photo.jpg'],
+      'C:\\': ['Documents and Settings <DIR>', 'Program Files <DIR>', 'WINDOWS <DIR>', 'autoexec.bat', 'config.sys']
+    };
+    function print(s){ out.textContent += s + '\n'; out.scrollTop = out.scrollHeight; }
+    function setPrompt(){ promptEl.textContent = cwd + '>'; }
+    function run(line){
+      print(cwd + '>' + line);
+      var parts = line.trim().split(/\s+/);
+      var cmd = (parts[0] || '').toLowerCase();
+      var arg = line.trim().slice(parts[0].length).trim();
+      if (cmd === '') { /* noop */ }
+      else if (cmd === 'help') print('For more information on a specific command, type the command name.\n\nCLS DIR CD ECHO VER DATE TIME WHOAMI TYPE COLOR TITLE MKDIR\nNOTEPAD CALC PAINT EXPLORER START EXIT');
+      else if (cmd === 'cls') out.textContent = '';
+      else if (cmd === 'echo') print(/^off$/i.test(arg) ? 'ECHO is off.' : (arg || 'ECHO is on.'));
+      else if (cmd === 'ver') print('\nMicrosoft Windows XP [Version 5.1.2601]\n');
+      else if (cmd === 'whoami') print('vibeos\\user');
+      else if (cmd === 'date') print('The current date is: ' + new Date().toDateString());
+      else if (cmd === 'time') print('The current time is: ' + new Date().toLocaleTimeString());
+      else if (cmd === 'dir') {
+        var list = fs[cwd] || [];
+        print(' Volume in drive C has no label.\n Directory of ' + cwd + '\n');
+        list.forEach(function(e){ var d = /<DIR>/.test(e); print((d ? '<DIR>          ' : '               ') + e.replace(' <DIR>', '')); });
+        print('     ' + list.length + ' File(s)');
+      }
+      else if (cmd === 'cd' || cmd === 'chdir') {
+        if (!arg || arg === '.') { /* stay */ }
+        else if (arg === '..') { cwd = cwd.replace(/\\[^\\]+$/, ''); if (!/\\/.test(cwd)) cwd = 'C:\\'; }
+        else if (arg === '\\') cwd = 'C:\\';
+        else cwd = /^[A-Za-z]:\\/.test(arg) ? arg : (cwd.replace(/\\$/, '') + '\\' + arg);
+        setPrompt();
+      }
+      else if (cmd === 'type') print(arg ? ('Contents of ' + arg + ' (simulated).') : 'The syntax of the command is incorrect.');
+      else if (cmd === 'mkdir' || cmd === 'md') { if (!arg) print('The syntax of the command is incorrect.'); }
+      else if (cmd === 'title') { /* noop */ }
+      else if (cmd === 'color') {
+        var map = { '0':'#000','1':'#3a6ea5','2':'#0A0','3':'#0AA','4':'#A00','7':'#C0C0C0','a':'#5F5','b':'#5FF','c':'#F55','e':'#FF5','f':'#FFF' };
+        var fg = map[(arg.slice(-1) || '7').toLowerCase()] || '#C0C0C0';
+        out.style.color = fg; inp.style.color = fg; promptEl.style.color = fg;
+      }
+      else if (cmd === 'notepad') openWindow('open-notepad', appRegistry['open-notepad']);
+      else if (cmd === 'calc') openWindow('open-calc', appRegistry['open-calc']);
+      else if (cmd === 'paint') openWindow('open-paint', appRegistry['open-paint']);
+      else if (cmd === 'explorer') openWindow('open-explorer', appRegistry['open-explorer']);
+      else if (cmd === 'start') { if (arg) { document.getElementById('run-input').value = arg; showRunDialog(); submitRun(); } }
+      else if (cmd === 'exit') { closeWin('win-cmd'); return; }
+      else print("'" + cmd + "' is not recognized as an internal or external command,\noperable program or batch file.");
+    }
+    var history = [], hi = -1;
+    inp.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { var v = inp.value; if (v.trim()) { history.push(v); hi = history.length; } run(v); inp.value = ''; e.preventDefault(); }
+      else if (e.key === 'ArrowUp') { if (history.length && hi > 0) { hi--; inp.value = history[hi]; } e.preventDefault(); }
+      else if (e.key === 'ArrowDown') { if (hi < history.length - 1) { hi++; inp.value = history[hi]; } else { hi = history.length; inp.value = ''; } e.preventDefault(); }
+    });
+    var win = document.getElementById('win-cmd');
+    if (win) win.addEventListener('mousedown', function(e){ if (!e.target.closest('.title-bar-controls')) setTimeout(function(){ inp.focus(); }, 0); });
+    setPrompt();
+    inp.focus();
+  }
+
   var appRegistry = {
     'open-notepad': {
       title: 'Untitled - Notepad', icon: '📝', w: 700, h: 450,
@@ -329,11 +396,12 @@
     'open-cmd': {
       title: 'Command Prompt', icon: '⬛', w: 600, h: 400,
       body: function() {
-        return '<div style="flex:1;font-family:Consolas,monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;margin-bottom:4px;background:#000;color:#C0C0C0;padding:4px">' +
-        'Microsoft Windows XP [Version 5.1.2601]\n(C) Copyright 1985-2001 Microsoft Corp.\n\nC:\\Documents and Settings\\User></div>' +
-        '<div style="display:flex;align-items:center;gap:4px;background:#000;padding:2px 4px"><span style="color:#C0C0C0">C:\\></span>' +
-        '<input type="text" style="flex:1;background:#000;color:#C0C0C0;border:1px solid #555;font-family:Consolas,monospace;font-size:13px"></div>';
-      }
+        return '<div id="cmd-output" style="flex:1;font-family:Consolas,monospace;font-size:13px;overflow-y:auto;white-space:pre-wrap;margin-bottom:4px;background:#000;color:#C0C0C0;padding:4px">' +
+        'Microsoft Windows XP [Version 5.1.2601]\n(C) Copyright 1985-2001 Microsoft Corp.\n</div>' +
+        '<div style="display:flex;align-items:center;gap:4px;background:#000;padding:2px 4px"><span id="cmd-prompt" style="color:#C0C0C0">C:\\Documents and Settings\\User&gt;</span>' +
+        '<input id="cmd-input" type="text" autocomplete="off" spellcheck="false" style="flex:1;background:#000;color:#C0C0C0;border:none;outline:none;font-family:Consolas,monospace;font-size:13px"></div>';
+      },
+      onOpen: function() { cmdInit(); }
     },
     'open-minesweeper': {
       title: 'Minesweeper', icon: '💣', w: 210, h: 350,
