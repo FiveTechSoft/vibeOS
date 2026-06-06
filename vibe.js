@@ -74,7 +74,34 @@
     var winId = createWindowId();
     var html = buildWindowShell(winId, title, '🪟', bodyHTML, 650, 420);
     applyDelta({ id: 'windows-container', op: 'append', html: html });
+    runWindowScripts(winId);
     setTimeout(function() { centerWindow(winId); }, 80);
+  }
+
+  // innerHTML does NOT execute <script>. Re-create script nodes so generated
+  // app logic runs, scoped to its own window via `root` / `$` / `$all`.
+  function runWindowScripts(winId) {
+    var win = document.getElementById(winId);
+    if (!win) return;
+    var body = win.querySelector('.window-body');
+    if (!body) return;
+    var bodyId = winId + '-body';
+    body.id = bodyId;
+    var scripts = body.querySelectorAll('script');
+    for (var i = 0; i < scripts.length; i++) {
+      var old = scripts[i];
+      var code = old.textContent;
+      var neo = document.createElement('script');
+      neo.textContent =
+        '(function(){\n' +
+        '  var root = document.getElementById("' + bodyId + '");\n' +
+        '  if(!root) return;\n' +
+        '  function $(s){ return root.querySelector(s); }\n' +
+        '  function $all(s){ return root.querySelectorAll(s); }\n' +
+        '  try {\n' + code + '\n  } catch(e){ console.error("VibeOS app error:", e); }\n' +
+        '})();';
+      old.parentNode.replaceChild(neo, old);
+    }
   }
 
   // ================================================================
@@ -257,18 +284,41 @@
       '- Use emoji for icons (💾📂✂📋🔍⚙🎨🖌️✏️), never <img> tags ' +
       '- Colors: bg white or #ECE9D8, borders #ACA899/#7F9DB9, text #000 ' +
       '- Use flex:1 (NEVER height:100%), overflow:auto for scroll areas ' +
-      '- No <script> tags. No <style> tags. No markdown. ' +
-      '- Make it functional and realistic like a real 2001 XP program ' +
+      '- No <style> tags (styles leak globally). Use inline style="" or set el.style.* in JS. ' +
+      '- No markdown, no explanations. ' +
+      '- MAKE IT ACTUALLY WORK — wire real behavior with JavaScript (see below), like a real 2001 XP program ' +
+      '' +
+      '=== MAKE IT WORK (JavaScript) === ' +
+      'Put app logic in ONE <script> tag at the END of your HTML. It RUNS automatically. ' +
+      'Your script is scoped to THIS window — you get 3 helpers, already defined: ' +
+      'root = your app root element. $("#id") = root.querySelector. $all(".cls") = root.querySelectorAll (NodeList). ' +
+      'ALWAYS query with $ / $all / root — NEVER document.getElementById (ids are not global). ' +
+      'Wire every button/input/menu-row by id. Keep state in plain JS vars. No external network/fetch. ' +
+      'Example wiring: var n=0; $("#inc").onclick=function(){ n++; $("#out").textContent=n; }; ' +
       '' +
       '=== EXAMPLE for "Paint" === ' +
       '<menu-bar><menu-item>File<menu-popup><menu-row id="pt-new">New</menu-row><menu-row id="pt-open">Open...</menu-row><menu-row id="pt-save">Save</menu-row><menu-divider></menu-divider><menu-row id="pt-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Edit<menu-popup><menu-row id="pt-undo">Undo</menu-row><menu-row id="pt-cut">Cut</menu-row><menu-row id="pt-copy">Copy</menu-row><menu-row id="pt-paste">Paste</menu-row></menu-popup></menu-item><menu-item>View<menu-popup><menu-row id="pt-toolbox">Tool Box</menu-row><menu-row id="pt-colors">Color Box</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="pt-about">About Paint</menu-row></menu-popup></menu-item></menu-bar><div class="toolbar"><button>✏️</button><button>🖌️</button><button>🧹</button><button>💧</button><button>🔤</button><span class="toolbar-separator"></span><button>🔍</button></div><div style="flex:1;display:flex;gap:4px;padding:4px"><div style="display:flex;flex-direction:column;gap:2px;padding:4px;background:#ECE9D8;border:1px solid #ACA899"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px"><button style="width:20px;height:20px;padding:0;background:#000"></button><button style="width:20px;height:20px;padding:0;background:#808080"></button><button style="width:20px;height:20px;padding:0;background:#800000"></button><button style="width:20px;height:20px;padding:0;background:#008000"></button><button style="width:20px;height:20px;padding:0;background:#000080"></button><button style="width:20px;height:20px;padding:0;background:#808000"></button><button style="width:20px;height:20px;padding:0;background:#800080"></button><button style="width:20px;height:20px;padding:0;background:#008080"></button><button style="width:20px;height:20px;padding:0;background:#C0C0C0"></button><button style="width:20px;height:20px;padding:0;background:#FFFF00"></button><button style="width:20px;height:20px;padding:0;background:#FF00FF"></button><button style="width:20px;height:20px;padding:0;background:#00FFFF"></button><button style="width:20px;height:20px;padding:0;background:#FFFFFF;border:1px solid #999"></button><button style="width:20px;height:20px;padding:0;background:#FFA500"></button></div></div><div style="flex:1;background:#FFFFFF;border:1px solid #7F9DB9;min-height:200px;overflow:auto;display:flex;align-items:center;justify-content:center"><span style="color:#ACA899;font-size:14px">Canvas — draw here</span></div></div> ' +
       '' +
+      '=== EXAMPLE for a WORKING app "Counter" (note the <script> wiring real behavior) === ' +
+      '<menu-bar><menu-item>File<menu-popup><menu-row id="ct-reset">Reset</menu-row><menu-divider></menu-divider><menu-row id="ct-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="ct-about">About</menu-row></menu-popup></menu-item></menu-bar>' +
+      '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">' +
+      '<div id="ct-out" style="font-size:42px;font-weight:bold">0</div>' +
+      '<div style="display:flex;gap:6px"><button id="ct-dec">−</button><button id="ct-inc">+</button></div></div>' +
+      '<script>' +
+      'var n=0; function draw(){ $("#ct-out").textContent=n; }' +
+      '$("#ct-inc").onclick=function(){ n++; draw(); };' +
+      '$("#ct-dec").onclick=function(){ n--; draw(); };' +
+      '$("#ct-reset").onclick=function(){ n=0; draw(); };' +
+      '$("#ct-about").onclick=function(){ alert("Counter 1.0"); };' +
+      '</script> ' +
+      '' +
       '=== REMINDERS === ' +
       '- <menu-item> without <menu-popup> = dead click (dropdown will NOT open) ' +
       '- Use EXACTLY these tags: <menu-bar> <menu-item> <menu-popup> <menu-row> <menu-divider> ' +
-      '- Do NOT wrap in ```html. Return RAW HTML. No explanations. ' +
+      '- ONE <script> at the end. Wire EVERY interactive id. Query via $ / $all / root, never document.getElementById. ' +
+      '- Do NOT wrap in ```html. Return RAW HTML (one <script> allowed). No explanations. ' +
       '=== IMPROV COMEDY === ' +
-      'Go with weird requests but render them as real XP apps. "Microsoft in Ancient Egypt" = business app in 3000 BC with scrolls and pyramids. No <script> ever. Raw HTML only.';
+      'Go with weird requests but render them as real, WORKING XP apps. "Microsoft in Ancient Egypt" = a functioning business app in 3000 BC with scrolls and pyramids — buttons still work via <script>. Raw HTML + one <script> only.';
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'https://api.deepseek.com/chat/completions', true);
