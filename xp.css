@@ -113,6 +113,102 @@ body.theme-lisa .desktop-icon {
   color: #000;
   text-shadow: none;
 }
+
+/* Mac OS — complete theme overrides */
+body.theme-mac .start-menu {
+  border-color: #555;
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.5);
+}
+body.theme-mac .start-menu .start-header {
+  background: linear-gradient(to bottom, #555 0%, #333 100%);
+  font-size: 14px;
+  font-weight: normal;
+  letter-spacing: 0.5px;
+}
+body.theme-mac .start-menu .start-right {
+  background: #E8E8E8;
+}
+body.theme-mac .taskbar {
+  font-family: 'Chicago', 'Charcoal', var(--font-family);
+  font-size: 10px;
+}
+body.theme-mac .window-body {
+  background: #FFFFFF;
+}
+body.theme-mac menu-bar {
+  background: #F0F0F0;
+  border-bottom: 1px solid #CCC;
+}
+body.theme-mac menu-item:hover {
+  background: #000080;
+  color: white;
+}
+body.theme-mac menu-popup {
+  border: 1px solid #000;
+  box-shadow: 1px 1px 0 #666;
+  border-radius: 0;
+}
+body.theme-mac menu-row:hover {
+  background: #000080;
+  color: white;
+}
+body.theme-mac .status-bar {
+  background: #F0F0F0;
+  border-top: 1px solid #CCC;
+}
+body.theme-mac .toolbar {
+  background: #F0F0F0;
+  border-bottom: 1px solid #CCC;
+}
+body.theme-mac button {
+  border-radius: 4px;
+  border-color: #888;
+}
+body.theme-mac button:hover {
+  border-color: #000;
+}
+body.theme-mac input[type="text"], body.theme-mac textarea, body.theme-mac select {
+  border-color: #888;
+  border-radius: 3px;
+}
+body.theme-mac .context-menu {
+  border: 1px solid #000;
+  border-radius: 0;
+  box-shadow: 1px 1px 0 #666;
+}
+body.theme-mac .context-item:hover {
+  background: #000080;
+  color: white;
+}
+body.theme-mac section.tabs button[role="tab"] {
+  border-radius: 3px 3px 0 0;
+}
+body.theme-mac section.tabs button[role="tab"][aria-selected="true"] {
+  background: #FFFFFF;
+}
+body.theme-mac fieldset {
+  border-color: #999;
+  border-radius: 4px;
+}
+body.theme-mac ::-webkit-scrollbar-track { background: #F0F0F0; }
+body.theme-mac ::-webkit-scrollbar-thumb { background: #C0C0C0; border-color: #999; }
+
+/* Lisa OS — complete overrides */
+body.theme-lisa .start-header {
+  background: linear-gradient(to bottom, #888 0%, #666 100%);
+}
+body.theme-lisa .start-right {
+  background: #E8E8E8;
+}
+body.theme-lisa .window-body {
+  background: #FAFAFA;
+}
+body.theme-lisa menu-bar {
+  background: #E8E8E8;
+}
+body.theme-lisa .status-bar {
+  background: #E8E8E8;
+}
 .taskbar .start-btn:hover { filter: brightness(1.1); }
 .taskbar .taskbar-spacer { flex: 1; }
 .taskbar .system-tray {
@@ -190,6 +286,9 @@ body.theme-mac .title-bar .title-bar-text {
   font-size: 11px;
   font-weight: normal;
   letter-spacing: 0.5px;
+}
+body.theme-mac .title-bar .title-bar-icon {
+  display: none;
 }
 body.theme-mac .title-bar-controls {
   order: -1;
