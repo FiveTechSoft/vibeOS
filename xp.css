@@ -585,7 +585,15 @@ div[role="progressbar"]::after {
 }
 .context-menu .context-item:hover { background: var(--menu-hover); color: white; }
 
-/* Active theme indicator — inherits parent menu colors */
+/* Style submenu — prevent white-text inheritance from parent hover */
+#style-submenu,
+#style-submenu .context-item {
+  color: #000;
+}
+#style-submenu .context-item:hover {
+  color: #fff;
+}
+/* Active theme indicator */
 #style-submenu .context-item.active-theme {
   font-weight: bold;
 }
