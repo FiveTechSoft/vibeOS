@@ -333,12 +333,49 @@ body.theme-mac .title-bar-controls button.close-btn:hover::after { content: '✕
 body.theme-mac .title-bar-controls button.min-btn:hover::after   { content: '─'; }
 body.theme-mac .title-bar-controls button.max-btn:hover::after   { content: '□'; }
 
-/* Lisa — subtle window controls */
-body.theme-lisa .title-bar-controls button {
-  background: #D0D0D0;
-  border: 1px solid #999;
+/* Lisa OS — square window controls, close on left */
+body.theme-lisa .title-bar {
+  flex-direction: row-reverse;
+  background: linear-gradient(to bottom, #E8E8E8 0%, #D0D0D0 100%);
 }
-body.theme-lisa .title-bar-controls button.close-btn { background: #CC9999; }
+body.theme-lisa .title-bar .title-bar-text {
+  text-align: center;
+  font-weight: normal;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+body.theme-lisa .title-bar .title-bar-icon { display: none; }
+body.theme-lisa .title-bar-controls {
+  gap: 4px;
+}
+body.theme-lisa .title-bar-controls button {
+  width: 16px; height: 16px;
+  min-height: 0;
+  border-radius: 2px;
+  border: 1px solid #666;
+  background: #E0E0E0;
+  font-size: 9px;
+  line-height: 14px;
+  text-align: center;
+  color: #333;
+  padding: 0;
+  font-weight: bold;
+}
+body.theme-lisa .title-bar-controls button:hover {
+  background: #C0C0C0;
+  filter: none;
+}
+body.theme-lisa .title-bar-controls button.close-btn {
+  background: #DDD;
+  order: 0;
+}
+body.theme-lisa .title-bar-controls button.close-btn:hover { background: #C88; color: #fff; }
+body.theme-lisa .title-bar-controls button.min-btn {
+  order: 2;
+}
+body.theme-lisa .title-bar-controls button.max-btn {
+  order: 1;
+}
 
 /* === Window Body === */
 .window-body {
