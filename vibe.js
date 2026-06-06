@@ -333,12 +333,12 @@
     if (name !== 'windows') document.body.classList.add('theme-' + name);
     currentTheme = name;
     try { localStorage.setItem('vibeos_theme', name); } catch(e) {}
-    // Update active indicator: bold + checkmark prefix
+    // Update active indicator via CSS class
     var items = document.querySelectorAll('#style-submenu .context-item');
     for (var i = 0; i < items.length; i++) {
       var t = items[i].getAttribute('data-theme');
-      var label = items[i].textContent.replace(/^[✓●] /, '');
-      items[i].textContent = (t === name ? '● ' : '  ') + label;
+      if (t === name) { items[i].classList.add('active-theme'); }
+      else { items[i].classList.remove('active-theme'); }
     }
   }
   if (currentTheme !== 'windows') {
