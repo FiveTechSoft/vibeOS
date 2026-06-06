@@ -301,4 +301,65 @@
     }
   });
 
+  // ---------------------------------------------------------------
+  // 9. Desktop rubber-band selection (left-button drag on desktop)
+  // ---------------------------------------------------------------
+  var selectBox = null;
+  var selectState = null;
+
+  function ensureSelectBox() {
+    if (!selectBox) {
+      selectBox = document.createElement('div');
+      selectBox.id = 'selection-box';
+      selectBox.style.cssText = 'position:fixed;border:1px dotted #fff;background:rgba(49,104,213,0.2);display:none;pointer-events:none;z-index:9999';
+      document.body.appendChild(selectBox);
+    }
+  }
+
+  document.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    if (e.target.closest('.window') || e.target.closest('.desktop-icon') ||
+        e.target.closest('.taskbar') || e.target.closest('#btn-start') ||
+        e.target.closest('.start-menu') || e.target.closest('#desktop-menu') ||
+        e.target.closest('#run-overlay') || e.target.closest('#run-dialog')) return;
+
+    e.preventDefault();
+    ensureSelectBox();
+    selectState = { startX: e.clientX, startY: e.clientY };
+    selectBox.style.display = 'block';
+    selectBox.style.left = e.clientX + 'px';
+    selectBox.style.top  = e.clientY + 'px';
+    selectBox.style.width  = '0px';
+    selectBox.style.height = '0px';
+  });
+
+  document.addEventListener('mousemove', function(e) {
+    if (!selectState) return;
+    var x = Math.min(selectState.startX, e.clientX);
+    var y = Math.min(selectState.startY, e.clientY);
+    selectBox.style.left   = x + 'px';
+    selectBox.style.top    = y + 'px';
+    selectBox.style.width  = Math.abs(e.clientX - selectState.startX) + 'px';
+    selectBox.style.height = Math.abs(e.clientY - selectState.startY) + 'px';
+  });
+
+  document.addEventListener('mouseup', function(e) {
+    if (!selectState) return;
+    var box = selectBox.getBoundingClientRect();
+    var icons = document.querySelectorAll('.desktop-icon');
+    for (var i = 0; i < icons.length; i++) {
+      var r = icons[i].getBoundingClientRect();
+      var hit = !(r.right < box.left || r.left > box.right || r.bottom < box.top || r.top > box.bottom);
+      if (hit) {
+        icons[i].style.background = 'rgba(255,255,255,0.3)';
+        icons[i].style.outline = '1px dotted #fff';
+        setTimeout((function(el) {
+          return function() { el.style.background = ''; el.style.outline = ''; };
+        })(icons[i]), 1500);
+      }
+    }
+    selectBox.style.display = 'none';
+    selectState = null;
+  });
+
 })();
