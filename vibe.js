@@ -90,24 +90,26 @@
       }
     },
     'open-calc': {
-      title: 'Calculator', icon: '🧮', w: 280, h: 360,
+      title: 'Calculator', icon: '🧮', w: 280, h: 390,
       body: function() {
-        return '<input type="text" id="calc-display" style="text-align:right;font-size:16px;width:100%;margin-bottom:4px" value="0" readonly>' +
+        return '<menu-bar><menu-item>View<menu-popup><menu-row id="calc-standard">Standard</menu-row><menu-row id="calc-scientific">Scientific</menu-row><menu-divider></menu-divider><menu-row id="calc-digit">Digit Grouping</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="calc-help">Help Topics</menu-row><menu-divider></menu-divider><menu-row id="calc-about">About Calculator</menu-row></menu-popup></menu-item></menu-bar>' +
+        '<input type="text" id="calc-display" style="text-align:right;font-size:16px;width:100%;margin:4px 0" value="0" readonly>' +
         '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;flex:1">' +
-        '<button>MC</button><button>MR</button><button>MS</button><button>M+</button>' +
-        '<button>←</button><button>CE</button><button>C</button><button>±</button>' +
-        '<button>7</button><button>8</button><button>9</button><button>/</button>' +
-        '<button>4</button><button>5</button><button>6</button><button>*</button>' +
-        '<button>1</button><button>2</button><button>3</button><button>-</button>' +
-        '<button>0</button><button>.</button><button>=</button><button>+</button></div>';
+        '<button id="calc-mc">MC</button><button id="calc-mr">MR</button><button id="calc-ms">MS</button><button id="calc-mplus">M+</button>' +
+        '<button id="calc-back">←</button><button id="calc-ce">CE</button><button id="calc-c">C</button><button id="calc-plusminus">±</button>' +
+        '<button id="calc-7">7</button><button id="calc-8">8</button><button id="calc-9">9</button><button id="calc-div">/</button>' +
+        '<button id="calc-4">4</button><button id="calc-5">5</button><button id="calc-6">6</button><button id="calc-mul">*</button>' +
+        '<button id="calc-1">1</button><button id="calc-2">2</button><button id="calc-3">3</button><button id="calc-sub">-</button>' +
+        '<button id="calc-0">0</button><button id="calc-dot">.</button><button id="calc-eq">=</button><button id="calc-add">+</button></div>';
       }
     },
     'open-explorer': {
       title: 'My Documents', icon: '📁', w: 650, h: 440,
       body: function() {
-        return '<menu-bar><menu-item>File<menu-popup><menu-row>New</menu-row><menu-row>Open</menu-row>' +
-        '<menu-divider></menu-divider><menu-row>Close</menu-row></menu-popup></menu-item>' +
-        '<menu-item>View<menu-popup><menu-row>Icons</menu-row><menu-row>Details</menu-row></menu-popup></menu-item></menu-bar>' +
+        return '<menu-bar><menu-item>File<menu-popup><menu-row id="fe-new">New</menu-row><menu-row id="fe-open">Open</menu-row>' +
+        '<menu-divider></menu-divider><menu-row id="fe-close">Close</menu-row></menu-popup></menu-item>' +
+        '<menu-item>Edit<menu-popup><menu-row id="fe-copy">Copy</menu-row><menu-row id="fe-paste">Paste</menu-row></menu-popup></menu-item>' +
+        '<menu-item>View<menu-popup><menu-row id="fe-icons">Icons</menu-row><menu-row id="fe-details">Details</menu-row></menu-popup></menu-item></menu-bar>' +
         '<div class="toolbar"><button>🔙</button><button>🔜</button><button>⬆</button><span class="toolbar-separator"></span><button>🔍</button></div>' +
         '<div class="address-bar"><label>Address:</label><input type="text" value="C:\\Documents and Settings\\User\\My Documents" style="flex:1"></div>' +
         '<div style="flex:1;display:flex">' +
@@ -129,13 +131,67 @@
         '<input type="text" style="flex:1;background:#000;color:#C0C0C0;border:1px solid #555;font-family:Consolas,monospace;font-size:13px"></div>';
       }
     },
+    'open-paint': {
+      title: 'untitled - Paint', icon: '🎨', w: 800, h: 550,
+      body: function() {
+        return '<menu-bar><menu-item>File<menu-popup><menu-row id="pt-new">New</menu-row><menu-row id="pt-open">Open...</menu-row><menu-row id="pt-save">Save</menu-row><menu-row id="pt-saveas">Save As...</menu-row><menu-divider></menu-divider><menu-row id="pt-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Edit<menu-popup><menu-row id="pt-undo">Undo</menu-row><menu-row id="pt-cut">Cut</menu-row><menu-row id="pt-copy">Copy</menu-row><menu-row id="pt-paste">Paste</menu-row></menu-popup></menu-item><menu-item>View<menu-popup><menu-row id="pt-toolbox">Tool Box</menu-row><menu-row id="pt-colorbox">Color Box</menu-row><menu-row id="pt-statusbar">Status Bar</menu-row></menu-popup></menu-item><menu-item>Image<menu-popup><menu-row id="pt-flip">Flip/Rotate...</menu-row><menu-row id="pt-stretch">Stretch/Skew...</menu-row><menu-row id="pt-invert">Invert Colors</menu-row><menu-divider></menu-divider><menu-row id="pt-attrib">Attributes...</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="pt-help">Help Topics</menu-row><menu-divider></menu-divider><menu-row id="pt-about">About Paint</menu-row></menu-popup></menu-item></menu-bar>' +
+        '<div style="flex:1;display:flex;gap:0">' +
+        // Left toolbox
+        '<div style="width:54px;background:#ECE9D8;border-right:1px solid #ACA899;padding:3px;display:flex;flex-direction:column;gap:2px;align-items:center">' +
+        '<button id="pt-tool-freeform" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">⭐</button>' +
+        '<button id="pt-tool-select" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">⬚</button>' +
+        '<button id="pt-tool-eraser" style="width:24px;height:24px;padding:0;font-size:14px;min-height:0">🧹</button>' +
+        '<button id="pt-tool-fill" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">🪣</button>' +
+        '<button id="pt-tool-picker" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">💉</button>' +
+        '<button id="pt-tool-zoom" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">🔍</button>' +
+        '<button id="pt-tool-pencil" style="width:24px;height:24px;padding:0;font-size:14px;min-height:0">✏️</button>' +
+        '<button id="pt-tool-brush" style="width:24px;height:24px;padding:0;font-size:14px;min-height:0">🖌️</button>' +
+        '<button id="pt-tool-airbrush" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">💨</button>' +
+        '<button id="pt-tool-text" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">A</button>' +
+        '<button id="pt-tool-line" style="width:24px;height:24px;padding:0;font-size:14px;min-height:0">╱</button>' +
+        '<button id="pt-tool-curve" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">〰</button>' +
+        '<button id="pt-tool-rect" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">▬</button>' +
+        '<button id="pt-tool-polygon" style="width:24px;height:24px;padding:0;font-size:10px;min-height:0">⬠</button>' +
+        '<button id="pt-tool-ellipse" style="width:24px;height:24px;padding:0;font-size:12px;min-height:0">◯</button>' +
+        '<button id="pt-tool-roundrect" style="width:24px;height:24px;padding:0;font-size:10px;min-height:0">▢</button>' +
+        '</div>' +
+        // Canvas
+        '<div style="flex:1;display:flex;flex-direction:column">' +
+        '<div id="pt-canvas" style="flex:1;background:#FFFFFF;border:2px inset #ACA899;margin:4px;overflow:hidden;position:relative;min-height:200px">' +
+        '<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ACA899;font-size:14px;pointer-events:none">Canvas — draw here</span>' +
+        '</div>' +
+        // Color palette
+        '<div style="display:flex;gap:1px;padding:2px 4px;background:#ECE9D8;flex-wrap:wrap;align-items:center">' +
+        '<div style="width:28px;height:22px;border:2px solid #000;background:#000;margin:1px"></div>' +
+        '<div style="width:28px;height:22px;border:2px solid #000;background:#FFF;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#808080;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#C0C0C0;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#800000;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#FF0000;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#808000;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#FFFF00;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#008000;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#00FF00;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#008080;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#00FFFF;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#000080;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#0000FF;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#800080;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#FF00FF;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#FFA500;margin:1px"></div>' +
+        '<div style="width:20px;height:18px;background:#A52A2A;margin:1px"></div>' +
+        '</div></div></div>';
+      }
+    },
     'open-ie': {
       title: 'Internet Explorer', icon: '🌐', w: 750, h: 500,
       body: function() {
-        return '<menu-bar><menu-item>File<menu-popup><menu-row>New Window</menu-row><menu-row>Open...</menu-row>' +
-        '<menu-row>Save As...</menu-row><menu-divider></menu-divider><menu-row>Print...</menu-row>' +
-        '<menu-row>Close</menu-row></menu-popup></menu-item>' +
-        '<menu-item>Favorites<menu-popup><menu-row>⭐ Google</menu-row><menu-row>⭐ MSN</menu-row></menu-popup></menu-item></menu-bar>' +
+        return '<menu-bar><menu-item>File<menu-popup><menu-row id="ie-new">New Window</menu-row><menu-row id="ie-open">Open...</menu-row>' +
+        '<menu-row id="ie-save">Save As...</menu-row><menu-divider></menu-divider><menu-row id="ie-print">Print...</menu-row>' +
+        '<menu-divider></menu-divider><menu-row id="ie-close">Close</menu-row></menu-popup></menu-item>' +
+        '<menu-item>Edit<menu-popup><menu-row id="ie-cut">Cut</menu-row><menu-row id="ie-copy">Copy</menu-row><menu-row id="ie-paste">Paste</menu-row></menu-popup></menu-item>' +
+        '<menu-item>Favorites<menu-popup><menu-row id="ie-fav-google">⭐ Google</menu-row><menu-row id="ie-fav-msn">⭐ MSN</menu-row></menu-popup></menu-item>' +
+        '<menu-item>Help<menu-popup><menu-row id="ie-about">About Internet Explorer</menu-row></menu-popup></menu-item></menu-bar>' +
         '<div class="toolbar"><button>🔙</button><button>🔜</button><button>⏹</button><button>🔄</button>' +
         '<span class="toolbar-separator"></span><span style="font-size:11px">Address:</span>' +
         '<input type="text" value="http://www.google.com" style="flex:1"></div>' +
@@ -245,7 +301,7 @@
       'file explorer':'open-explorer','explorer':'open-explorer',
       'command prompt':'open-cmd','cmd':'open-cmd',
       'internet explorer':'open-ie','ie':'open-ie','browser':'open-ie',
-      'paint':'open-paint','mspaint':'open-paint',
+      'paint':'open-paint','mspaint':'open-paint','minesweeper':'open-minesweeper','media player':'open-wmp','wmp':'open-wmp'
       'minesweeper':'open-minesweeper','media player':'open-wmp','wmp':'open-wmp'
     };
     return map[name.toLowerCase()] || null;
