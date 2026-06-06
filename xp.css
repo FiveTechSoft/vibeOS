@@ -690,10 +690,13 @@ div[role="progressbar"]::after {
 
 /* Style submenu — prevent white-text inheritance from parent hover */
 #style-submenu,
-#style-submenu .context-item {
+#style-submenu .context-item,
+#recent-submenu,
+#recent-submenu .context-item {
   color: #000;
 }
-#style-submenu .context-item:hover {
+#style-submenu .context-item:hover,
+#recent-submenu .context-item:hover {
   color: #fff;
 }
 /* Active theme indicator */

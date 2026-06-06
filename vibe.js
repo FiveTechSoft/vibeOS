@@ -75,8 +75,45 @@
     var html = buildWindowShell(winId, title, '🪟', bodyHTML, 650, 420);
     applyDelta({ id: 'windows-container', op: 'append', html: html });
     runWindowScripts(winId);
+    var win = document.getElementById(winId);
+    if (win) {
+      win._appName = title; win._html = bodyHTML;
+      var controls = win.querySelector('.title-bar-controls');
+      if (controls) {
+        var b = document.createElement('button');
+        b.className = 'improve-btn'; b.textContent = '✨';
+        b.title = 'Ask AI to improve this app';
+        b.setAttribute('data-improve', winId);
+        controls.insertBefore(b, controls.firstChild);
+      }
+    }
     setTimeout(function() { centerWindow(winId); }, 80);
   }
+
+  // Ask DeepSeek to refine an already-generated app in place
+  function improveCurrentApp(winId) {
+    var win = document.getElementById(winId);
+    if (!win) return;
+    var instruction = window.prompt('How should DeepSeek improve "' + win._appName + '"?\n\ne.g. "add a dark mode", "make the buttons bigger", "add a clear button"');
+    if (!instruction) return;
+    var status = win.querySelector('.status-bar-field');
+    if (status) status.textContent = '🧠 Improving…';
+    hallucinateApp(win._appName, function(html, err) {
+      if (err) { if (status) status.textContent = 'Error: ' + err; return; }
+      var body = win.querySelector('.window-body');
+      if (body) { body.innerHTML = html; runWindowScripts(winId); }
+      win._html = html;
+      addRecentApp(win._appName, html);
+      if (status) status.textContent = 'Ready';
+    }, { prevHtml: win._html, instruction: instruction });
+  }
+
+  document.addEventListener('click', function(e) {
+    var b = e.target.closest('[data-improve]');
+    if (!b) return;
+    e.stopPropagation();
+    improveCurrentApp(b.getAttribute('data-improve'));
+  });
 
   // innerHTML does NOT execute <script>. Re-create script nodes so generated
   // app logic runs, scoped to its own window via `root` / `$` / `$all`.
@@ -557,19 +594,116 @@
         var ctx = cv.getContext('2d');
         ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
         var tool = 'pencil', color = '#000', drawing = false;
-        function sizeFor(){ return tool === 'brush' ? 4 : tool === 'eraser' ? 14 : 1; }
-        function strokeColor(){ return tool === 'eraser' ? '#fff' : color; }
+        var shapeStart = null, savedCanvas = null;
         function pos(e){ var r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
-        cv.addEventListener('mousedown', function(e){
-          if (tool === 'fill') { ctx.fillStyle = color; ctx.fillRect(0, 0, cv.width, cv.height); return; }
-          drawing = true; var p = pos(e);
-          ctx.strokeStyle = strokeColor(); ctx.lineWidth = sizeFor(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-          ctx.beginPath(); ctx.moveTo(p.x, p.y);
+        function saveState(){ try { savedCanvas = ctx.getImageData(0, 0, cv.width, cv.height); } catch(e){} }
+        function restoreState(){ if (savedCanvas) try { ctx.putImageData(savedCanvas, 0, 0); } catch(e){} }
+        function isShape(s){ return s === 'line' || s === 'rect' || s === 'ellipse' || s === 'roundrect'; }
+        function drawShape(x1, y1, x2, y2, finalize) {
+          var x = Math.min(x1, x2), y = Math.min(y1, y2);
+          var w = Math.abs(x2 - x1), h = Math.abs(y2 - y1);
+          if (finalize) { ctx.strokeStyle = color; ctx.lineWidth = tool === 'brush' ? 4 : 1; ctx.fillStyle = color; }
+          else { ctx.strokeStyle = color; ctx.lineWidth = tool === 'brush' ? 4 : 1; }
+          ctx.beginPath();
+          if (tool === 'rect' || tool === 'roundrect') {
+            var r = tool === 'roundrect' ? Math.min(8, w/4, h/4) : 0;
+            if (r > 0) { ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); }
+            else ctx.rect(x, y, w, h);
+          } else if (tool === 'ellipse') {
+            var rx = w/2, ry = h/2, cx = x+rx, cy = y+ry;
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+          } else if (tool === 'line') {
+            ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+          }
+          ctx.stroke();
+        }
+        function sizeFor(){ return tool === 'brush' ? 4 : tool === 'eraser' ? 14 : tool === 'airbrush' ? 8 : 1; }
+        function strokeColor(){ return tool === 'eraser' ? '#fff' : color; }
+        // Flood fill using scanline algorithm
+        function floodFill(sx, sy, fillColor) {
+          var img = ctx.getImageData(0, 0, cv.width, cv.height);
+          var d = img.data, w = cv.width, h = cv.height;
+          var stack = [[sx, sy]];
+          var targetIdx = (sy * w + sx) * 4;
+          var tR = d[targetIdx], tG = d[targetIdx+1], tB = d[targetIdx+2], tA = d[targetIdx+3];
+          // Parse fill color
+          var fc = fillColor;
+          var div = document.createElement('div'); div.style.color = fc; document.body.appendChild(div);
+          var cs = getComputedStyle(div).color; document.body.removeChild(div);
+          var m = cs.match(/[\d.]+/g); if (!m) return;
+          var fR = +m[0], fG = +m[1], fB = +m[2];
+          if (tR === fR && tG === fG && tB === fB) return;
+          var visited = {}, key;
+          while (stack.length > 0) {
+            var p = stack.pop(), px = p[0], py = p[1];
+            if (px < 0 || py < 0 || px >= w || py >= h) continue;
+            key = py * w + px;
+            if (visited[key]) continue;
+            var idx = key * 4;
+            if (Math.abs(d[idx]-tR) > 2 || Math.abs(d[idx+1]-tG) > 2 || Math.abs(d[idx+2]-tB) > 2) continue;
+            visited[key] = true;
+            d[idx] = fR; d[idx+1] = fG; d[idx+2] = fB;
+            stack.push([px+1, py], [px-1, py], [px, py+1], [px, py-1]);
+          }
+          ctx.putImageData(img, 0, 0);
+        }
+        // Airbrush spray interval
+        var airInterval = null;
+        function startAir(e) {
+          drawing = true;
+          airInterval = setInterval(function() {
+            if (!drawing) { clearInterval(airInterval); airInterval = null; return; }
+            var p = pos(e); // approximate, uses last mousemove
+            for (var k = 0; k < 6; k++) {
+              var rx = p.x + (Math.random() - 0.5) * 16, ry = p.y + (Math.random() - 0.5) * 16;
+              ctx.fillStyle = strokeColor();
+              ctx.fillRect(rx, ry, 1.5, 1.5);
+            }
+          }, 30);
+        }
+        cv.addEventListener('mousemove', function(e){
+          var p = pos(e);
+          if (tool === 'airbrush') { /* position tracked for spray */ }
+          if (!drawing) return;
+          if (isShape(tool)) {
+            restoreState();
+            drawShape(shapeStart.x, shapeStart.y, p.x, p.y, false);
+          } else if (tool !== 'airbrush') {
+            ctx.lineTo(p.x, p.y); ctx.stroke();
+          }
         });
-        cv.addEventListener('mousemove', function(e){ if (!drawing) return; var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-        window.addEventListener('mouseup', function(){ drawing = false; });
+        cv.addEventListener('mousedown', function(e){
+          var p = pos(e);
+          if (tool === 'fill') { floodFill(Math.round(p.x), Math.round(p.y), color); return; }
+          if (tool === 'picker') {
+            try { var px = ctx.getImageData(Math.round(p.x), Math.round(p.y), 1, 1).data; color = '#' + ((1<<24)+(px[0]<<16)+(px[1]<<8)+px[2]).toString(16).slice(1); tool = 'pencil'; }
+            catch(ex) {}
+            return;
+          }
+          if (isShape(tool)) {
+            drawing = true; shapeStart = p; saveState();
+          } else if (tool === 'airbrush') {
+            startAir(e);
+          } else {
+            drawing = true;
+            ctx.strokeStyle = strokeColor(); ctx.lineWidth = sizeFor(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.beginPath(); ctx.moveTo(p.x, p.y);
+          }
+        });
+        window.addEventListener('mouseup', function(e){
+          if (isShape(tool) && drawing && shapeStart) {
+            restoreState(); drawShape(shapeStart.x, shapeStart.y, pos(e).x, pos(e).y, true);
+          }
+          drawing = false; shapeStart = null; savedCanvas = null;
+          if (airInterval) { clearInterval(airInterval); airInterval = null; }
+        });
         // tools
-        var toolMap = { 'pt-tool-pencil':'pencil', 'pt-tool-brush':'brush', 'pt-tool-eraser':'eraser', 'pt-tool-fill':'fill' };
+        var toolMap = {
+          'pt-tool-pencil':'pencil', 'pt-tool-brush':'brush', 'pt-tool-eraser':'eraser',
+          'pt-tool-fill':'fill', 'pt-tool-picker':'picker', 'pt-tool-airbrush':'airbrush',
+          'pt-tool-line':'line', 'pt-tool-rect':'rect', 'pt-tool-ellipse':'ellipse',
+          'pt-tool-roundrect':'roundrect'
+        };
         Object.keys(toolMap).forEach(function(id){ wire(id, function(){ tool = toolMap[id]; }); });
         // color palette
         var win = document.getElementById('win-paint');
@@ -578,7 +712,7 @@
           var bg = (sw.style.background || sw.style.backgroundColor);
           if (!bg) return;
           sw.style.cursor = 'pointer';
-          sw.addEventListener('click', function(){ color = bg; if (tool === 'eraser' || tool === 'fill') {} });
+          sw.addEventListener('click', function(){ color = bg; });
         });
         wire('pt-new', function(){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); });
         wire('pt-invert', function(){ var d = ctx.getImageData(0,0,cv.width,cv.height); for (var i=0;i<d.data.length;i+=4){ d.data[i]=255-d.data[i]; d.data[i+1]=255-d.data[i+1]; d.data[i+2]=255-d.data[i+2]; } ctx.putImageData(d,0,0); });
@@ -626,7 +760,7 @@
   // ================================================================
   // DeepSeek API
   // ================================================================
-  function hallucinateApp(appName, callback) {
+  function hallucinateApp(appName, callback, ctx) {
     var key = API_KEY;
     if (!key) { key = promptForKey(); }
     if (!key) { callback(null, 'No API key provided'); return; }
@@ -710,11 +844,19 @@
       else { callback(null, 'DeepSeek HTTP ' + xhr.status); }
     };
     xhr.onerror = function() { callback(null, 'Network error'); };
+    var userMsg;
+    if (ctx && ctx.prevHtml) {
+      userMsg = 'Here is the current inner body HTML of the "' + appName + '" app:\n\n' + ctx.prevHtml +
+        '\n\nImprove it per this request: "' + ctx.instruction + '". ' +
+        'Keep what already works, apply the change, and return the COMPLETE updated inner body HTML (with its one <script>). Return only the HTML.';
+    } else {
+      userMsg = 'Create content for a Windows XP app: ' + appName + '. Return only the inner body HTML.';
+    }
     xhr.send(JSON.stringify({
       model: 'deepseek-chat',
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: 'Create content for a Windows XP app: ' + appName + '. Return only the inner body HTML.' }
+        { role: 'user', content: userMsg }
       ],
       max_tokens: 4096
     }));
@@ -807,18 +949,7 @@
     }
   });
 
-  document.addEventListener('dblclick', function(e) {
-    var icon = e.target.closest('.desktop-icon');
-    if (!icon) return;
-    var rec = icon.getAttribute('data-recent');
-    if (rec) { openRecentApp(rec); return; }
-    var action = icon.getAttribute('data-action');
-    if (action && appRegistry[action]) { openWindow(action, appRegistry[action]); }
-    else if (action) {
-      var label = (icon.textContent || '').trim();
-      if (label) { document.getElementById('run-input').value = label; showRunDialog(); submitRun(); }
-    }
-  });
+  // Desktop icons now open on single-click (see click handlers below).
 
   // Run dialog buttons
   document.addEventListener('click', function(e) {
@@ -1075,7 +1206,7 @@
       return;
     }
     var r = e.target.closest('[data-recent]');
-    if (!r || r.classList.contains('desktop-icon')) return; // desktop icons launch on dblclick
+    if (!r) return;
     openRecentApp(r.getAttribute('data-recent'));
     var sm = document.getElementById('start-menu'); if (sm) sm.style.display = 'none';
     if (ctxMenu) ctxMenu.style.display = 'none';
