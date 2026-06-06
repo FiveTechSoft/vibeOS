@@ -59,20 +59,20 @@ body.theme-mac {
 }
 
 body.theme-lisa {
-  --desktop-bg: #D4D0C8;
-  --taskbar-bg: #C0C0C0;
+  --desktop-bg: #C8C8C8;
+  --taskbar-bg: #B0B0B0;
   --taskbar-border: #888;
-  --start-btn-bg: #C0C0C0;
-  --window-border: 2px solid #555;
-  --titlebar-bg: #E8E8E8;
+  --start-btn-bg: #B0B0B0;
+  --window-border: 1px solid #333;
+  --titlebar-bg: #D8D8D8;
   --titlebar-text: #000;
-  --window-bg: #F0F0F0;
+  --window-bg: #FFFFFF;
   --button-bg: #E0E0E0;
-  --button-border: #888;
-  --menu-hover: #555;
-  --font-family: 'Geneva', 'Tahoma', sans-serif;
-  --border-radius-title: 6px 6px 0 0;
-  --window-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+  --button-border: #555;
+  --menu-hover: #000;
+  --font-family: 'Courier New', 'Geneva', 'Tahoma', monospace;
+  --border-radius-title: 2px 2px 0 0;
+  --window-shadow: 1px 1px 0 #555;
 }
 
 /* === Desktop === */
@@ -193,21 +193,127 @@ body.theme-mac fieldset {
 body.theme-mac ::-webkit-scrollbar-track { background: #F0F0F0; }
 body.theme-mac ::-webkit-scrollbar-thumb { background: #C0C0C0; border-color: #999; }
 
-/* Lisa OS — complete overrides */
+/* Lisa OS — monochrome, flat, document-centric, sharp edges */
+body.theme-lisa * {
+  text-shadow: none !important;
+}
+body.theme-lisa .start-menu {
+  border: 1px solid #333;
+  box-shadow: 1px 1px 0 #666;
+  border-radius: 0;
+}
 body.theme-lisa .start-header {
-  background: linear-gradient(to bottom, #888 0%, #666 100%);
+  background: #333;
+  color: #fff;
+  font-size: 12px;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  padding: 6px 12px;
 }
 body.theme-lisa .start-right {
-  background: #E8E8E8;
+  background: #D8D8D8;
+  border-left: 1px solid #999;
 }
 body.theme-lisa .window-body {
-  background: #FAFAFA;
+  background: #FFFFFF;
 }
 body.theme-lisa menu-bar {
   background: #E8E8E8;
+  border-bottom: 1px solid #555;
+}
+body.theme-lisa menu-item {
+  padding: 2px 10px;
+}
+body.theme-lisa menu-item:hover {
+  background: #000;
+  color: #fff;
+}
+body.theme-lisa menu-popup {
+  border: 1px solid #333;
+  box-shadow: 1px 1px 0 #666;
+  border-radius: 0;
+}
+body.theme-lisa menu-row:hover {
+  background: #000;
+  color: #fff;
 }
 body.theme-lisa .status-bar {
   background: #E8E8E8;
+  border-top: 1px solid #555;
+  font-family: monospace;
+  font-size: 10px;
+}
+body.theme-lisa .toolbar {
+  background: #E8E8E8;
+  border-bottom: 1px solid #555;
+}
+body.theme-lisa button {
+  border-radius: 0;
+  border: 1px solid #555;
+  background: #E8E8E8;
+  font-family: monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+body.theme-lisa button:hover {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+body.theme-lisa button.primary {
+  border: 2px solid #000;
+  font-weight: bold;
+}
+body.theme-lisa input[type="text"], body.theme-lisa textarea, body.theme-lisa select {
+  border: 1px solid #555;
+  border-radius: 0;
+  font-family: monospace;
+  font-size: 11px;
+  background: #FFF;
+}
+body.theme-lisa .context-menu {
+  border: 1px solid #333;
+  border-radius: 0;
+  box-shadow: 1px 1px 0 #666;
+}
+body.theme-lisa .context-item:hover {
+  background: #000;
+  color: #fff;
+}
+body.theme-lisa section.tabs button[role="tab"] {
+  border-radius: 0;
+  border: 1px solid #555;
+  background: #D8D8D8;
+}
+body.theme-lisa section.tabs button[role="tab"][aria-selected="true"] {
+  background: #FFFFFF;
+  border-bottom-color: #FFF;
+  font-weight: bold;
+}
+body.theme-lisa fieldset {
+  border: 1px solid #555;
+  border-radius: 0;
+}
+body.theme-lisa fieldset legend {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+body.theme-lisa ::-webkit-scrollbar-track { background: #E8E8E8; }
+body.theme-lisa ::-webkit-scrollbar-thumb { background: #999; border: 1px solid #555; border-radius: 0; }
+body.theme-lisa ::-webkit-scrollbar-button { border: 1px solid #555; }
+body.theme-lisa .taskbar {
+  border-top: 1px solid #555;
+}
+body.theme-lisa .desktop-icon {
+  font-family: monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .taskbar .start-btn:hover { filter: brightness(1.1); }
 .taskbar .taskbar-spacer { flex: 1; }
@@ -333,49 +439,46 @@ body.theme-mac .title-bar-controls button.close-btn:hover::after { content: '✕
 body.theme-mac .title-bar-controls button.min-btn:hover::after   { content: '─'; }
 body.theme-mac .title-bar-controls button.max-btn:hover::after   { content: '□'; }
 
-/* Lisa OS — square window controls, close on left */
+/* Lisa OS — square monochrome window controls, close on left */
 body.theme-lisa .title-bar {
   flex-direction: row-reverse;
-  background: linear-gradient(to bottom, #E8E8E8 0%, #D0D0D0 100%);
+  background: #D8D8D8;
+  border-bottom: 1px solid #555;
 }
 body.theme-lisa .title-bar .title-bar-text {
   text-align: center;
-  font-weight: normal;
+  font-weight: bold;
   font-size: 11px;
   letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: monospace;
 }
 body.theme-lisa .title-bar .title-bar-icon { display: none; }
-body.theme-lisa .title-bar-controls {
-  gap: 4px;
-}
+body.theme-lisa .title-bar-controls { gap: 3px; }
 body.theme-lisa .title-bar-controls button {
-  width: 16px; height: 16px;
+  width: 18px; height: 18px;
   min-height: 0;
-  border-radius: 2px;
-  border: 1px solid #666;
-  background: #E0E0E0;
-  font-size: 9px;
-  line-height: 14px;
+  border-radius: 0;
+  border: 1px solid #333;
+  background: #E8E8E8;
+  font-size: 10px;
+  line-height: 16px;
   text-align: center;
-  color: #333;
+  color: #000;
   padding: 0;
   font-weight: bold;
 }
 body.theme-lisa .title-bar-controls button:hover {
-  background: #C0C0C0;
+  background: #000;
+  color: #fff;
   filter: none;
 }
 body.theme-lisa .title-bar-controls button.close-btn {
-  background: #DDD;
   order: 0;
+  border-width: 2px;
 }
-body.theme-lisa .title-bar-controls button.close-btn:hover { background: #C88; color: #fff; }
-body.theme-lisa .title-bar-controls button.min-btn {
-  order: 2;
-}
-body.theme-lisa .title-bar-controls button.max-btn {
-  order: 1;
-}
+body.theme-lisa .title-bar-controls button.min-btn { order: 2; }
+body.theme-lisa .title-bar-controls button.max-btn { order: 1; background: #FFFFFF; }
 
 /* === Window Body === */
 .window-body {
