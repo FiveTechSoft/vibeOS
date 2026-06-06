@@ -156,14 +156,19 @@
     if (!key) { callback(null, 'No API key provided'); return; }
 
     var systemPrompt = 'You are a Windows XP application content generator. ' +
-      'You return ONLY the inner body HTML for an app window (NO window shell, NO title bar, NO status bar). ' +
+      'You return ONLY the inner body HTML for an app window (NO outer <div class="window">, NO title bar, NO status bar). ' +
       'The window shell (title bar with min/max/close, status bar) is already provided by the system. ' +
-      'Your HTML goes INSIDE <div class="window-body">. ' +
-      'Use XP CSS classes: field-row (label+input rows), menu-bar, toolbar, address-bar, tabs, tree-view. ' +
+      'CRITICAL: The FIRST element in your response MUST be a <menu-bar> with at least a "File" menu. ' +
+      'Example: <menu-bar><menu-item>File<menu-popup><menu-row id="app-new">New</menu-row>' +
+      '<menu-row id="app-open">Open...</menu-row><menu-divider></menu-divider>' +
+      '<menu-row id="app-exit">Exit</menu-row></menu-popup></menu-item>' +
+      '<menu-item>Help<menu-popup><menu-row id="app-about">About</menu-row></menu-popup></menu-item></menu-bar> ' +
+      'After the menu bar, add the app content. ' +
+      'Use XP CSS classes: field-row (label+input rows), toolbar, address-bar, tabs section.tabs>button[role=tab], tree-view ul.tree-view. ' +
       'Buttons use <button>. Inputs use <input type="text"> or <textarea>. ' +
       'All interactive elements must have unique IDs. ' +
       'Do NOT include <script> tags. Do NOT wrap in markdown. Return raw HTML only. ' +
-      'Include appropriate UI controls for the app. Make it functional. ' +
+      'Make the app functional with appropriate UI controls. ' +
       'This is improv comedy — go with whatever weird app the user asks for.';
 
     var xhr = new XMLHttpRequest();
