@@ -26,7 +26,11 @@ Type whatever you want into **Start → Run...** Here we ask for `msmoney` — M
 
 Seconds later, a fully-rendered Microsoft Money 2005 clone appears — account tree, transaction register, tabs, toolbar, running balance. None of this was written by a human or stored on disk. The model invented the layout, the data, and the behavior on the spot.
 
-> **This is a toy today.** The apps are throwaway and stateless, the UI is faked, nothing persists. But it's a glimpse of a direction: software conjured on demand from a description, no install, no build, no source. Where this goes in a few years — who knows.
+**3. The apps actually work**
+
+These aren't static mockups. DeepSeek ships each app with its own JavaScript, which VibeOS executes in a sandbox scoped to that window — buttons click, inputs update, state lives. A generated stopwatch really counts; a generated to-do list really adds and removes items; a generated calculator really does the math. Each app's script gets three helpers (`root`, `$`, `$all`) so it can wire its own widgets without touching the rest of the desktop.
+
+> **This is a toy today.** Apps are conjured per-run and don't persist across sessions — close the window and it's gone. But within a window they're live, interactive programs, not screenshots. A glimpse of a direction: software conjured on demand from a description, no install, no build, no source. Where this goes in a few years — who knows.
 
 ---
 
@@ -36,6 +40,7 @@ Seconds later, a fully-rendered Microsoft Money 2005 clone appears — account t
 
 ### Features
 - **Start → Run...** — type any app name, DeepSeek generates it live
+- **Live apps** — generated apps run real JavaScript, scoped per window (buttons, inputs, state all work)
 - **Right-click desktop** — context menu with Style submenu
 - **3 themes** — Windows XP · Mac OS · Apple Lisa
 - **Window management** — drag, resize, minimize, maximize, close
@@ -47,5 +52,5 @@ Seconds later, a fully-rendered Microsoft Money 2005 clone appears — account t
 index.html    — XP desktop shell
 xp.css        — Luna theme + Mac + Lisa styles
 xp.js         — window behaviors (menus, drag, resize, selection)
-vibe.js       — app logic, templates, DeepSeek API
+vibe.js       — app logic, templates, DeepSeek API, per-window script execution
 ```
