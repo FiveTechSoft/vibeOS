@@ -331,6 +331,54 @@
     }
   });
 
+  // ================================================================
+  // Desktop Right-Click Context Menu
+  // ================================================================
+  var ctxMenu = document.getElementById('desktop-menu');
+  document.addEventListener('contextmenu', function(e) {
+    var onDesktop = e.target.closest('.desktop') && !e.target.closest('.window');
+    if (!onDesktop) return;
+    e.preventDefault();
+    if (ctxMenu) {
+      ctxMenu.style.display = 'block';
+      ctxMenu.style.left = e.clientX + 'px';
+      ctxMenu.style.top  = e.clientY + 'px';
+      // Keep menu inside viewport
+      var r = ctxMenu.getBoundingClientRect();
+      if (r.right  > window.innerWidth)  ctxMenu.style.left = (e.clientX - r.width) + 'px';
+      if (r.bottom > window.innerHeight) ctxMenu.style.top  = (e.clientY - r.height) + 'px';
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#desktop-menu')) {
+      if (ctxMenu) ctxMenu.style.display = 'none';
+    }
+    // Handle context menu item clicks
+    if (e.target.closest('#desktop-menu .context-item')) {
+      var item = e.target.closest('.context-item');
+      var id = item.id;
+      var action = item.getAttribute('data-action');
+
+      if (id === 'ctx-run') { showRunDialog(); }
+      else if (id === 'ctx-refresh') { location.reload(); }
+      else if (id === 'ctx-properties') {
+        openHallucinatedWindow('Desktop Properties',
+          '<fieldset><legend>Background</legend><div class="field-row"><label>Color:</label>' +
+          '<select><option>Blue (#3A6EA5)</option><option>Silver</option><option>Olive Green</option></select></div>' +
+          '<div class="field-row"><label>Wallpaper:</label><input type="text" value="None"></div></fieldset>' +
+          '<fieldset><legend>Screen Saver</legend><div class="field-row"><label>Screen saver:</label>' +
+          '<select><option>Windows XP</option><option>3D Pipes</option><option>Starfield</option></select></div>' +
+          '<div class="field-row"><label>Wait:</label><input type="text" value="10" style="width:40px"> minutes</div></fieldset>' +
+          '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">' +
+          '<button class="primary">OK</button><button>Cancel</button><button>Apply</button></div>');
+      }
+      else if (action && appRegistry[action]) { openWindow(action, appRegistry[action]); }
+
+      if (ctxMenu) ctxMenu.style.display = 'none';
+    }
+  });
+
   // Clock
   function updateClock() {
     var now = new Date();
