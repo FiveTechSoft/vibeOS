@@ -1,6 +1,6 @@
 # VibeOS
 
-**AI-hallucinated Windows XP desktop — running entirely in the browser.**
+**AI-hallucinated desktop OS — running entirely in the browser.**
 
 👉 **[Launch VibeOS](https://fivetechsoft.github.io/vibeOS/)**
 
@@ -18,13 +18,13 @@ There is no `msmoney.exe`. There is no code for it anywhere in this repo. You ty
 
 ![Run dialog — typing an app name](run.jpg)
 
-Type whatever you want into **Start → Run...** Here we ask for `msmoney` — Microsoft Money, a real personal-finance app Microsoft discontinued in 2009. VibeOS ships **no code** for it. It just hands the name to DeepSeek, which reconstructs the app from memory — *hallucinating* it back into existence, complete and working.
+Type whatever you want into **Start → Run...** Here we ask for `msmoney` — a personal-finance app. VibeOS ships **no code** for it. It just hands the name to DeepSeek, which constructs the app from memory — *hallucinating* it into existence, complete and working.
 
 **2. The AI delivers a full app**
 
-![Generated Microsoft Money clone](msmoney.jpg)
+![Generated money app clone](msmoney.jpg)
 
-Seconds later, a fully-rendered Microsoft Money 2005 clone appears — account tree, transaction register, tabs, toolbar, running balance. None of this was written by a human or stored on disk. The model invented the layout, the data, and the behavior on the spot.
+Seconds later, a fully-rendered money-management app appears — account tree, transaction register, tabs, toolbar, running balance. None of this was written by a human or stored on disk. The model invented the layout, the data, and the behavior on the spot.
 
 **3. The apps actually work**
 
@@ -42,7 +42,7 @@ These aren't static mockups. DeepSeek ships each app with its own JavaScript, wh
 - **Start → Run...** — type any app name, DeepSeek generates it live
 - **Live apps** — generated apps run real JavaScript, scoped per window (buttons, inputs, state all work)
 - **Right-click desktop** — context menu with Style submenu
-- **3 themes** — Windows XP · Mac OS · Apple Lisa
+- **3 themes** — vibeOS · Mac OS · Apple Lisa
 - **Window management** — drag, resize, minimize, maximize, close
 - **Rubber-band selection** on desktop
 - No server needed — pure HTML/CSS/JS, hosted on GitHub Pages

@@ -855,14 +855,14 @@
     if (!key) { key = promptForKey(); }
     if (!key) { callback(null, 'No API key provided'); return; }
 
-    var systemPrompt = 'You generate inner body HTML for Windows XP applications. ' +
+    var systemPrompt = 'You generate inner body HTML for vibeOS applications. ' +
       'CRITICAL: Return ONLY the HTML that goes INSIDE <div class="window-body">. ' +
       'NEVER include outer window div, title bar, or status bar. ' +
       'NEVER wrap in ```html code blocks. Raw HTML only. ' +
       '' +
       '=== CUSTOM HTML ELEMENTS (must use exactly as shown — these are real custom elements, NOT divs) === ' +
       'CRITICAL: Every menu item with a dropdown MUST contain a <menu-popup> with <menu-row> children. ' +
-      'Without <menu-popup>, the menu will NOT open. This is how Windows XP menus work. ' +
+      'Without <menu-popup>, the menu will NOT open. This is how vibeOS menus work. ' +
       '' +
       'Menu bar (ALWAYS first element, exactly this structure): ' +
       '<menu-bar><menu-item>File<menu-popup><menu-row id="X-new">New</menu-row><menu-row id="X-open">Open...</menu-row><menu-row id="X-save">Save</menu-row><menu-divider></menu-divider><menu-row id="X-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Edit<menu-popup><menu-row id="X-undo">Undo</menu-row><menu-row id="X-cut">Cut</menu-row><menu-row id="X-copy">Copy</menu-row><menu-row id="X-paste">Paste</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="X-about">About</menu-row></menu-popup></menu-item></menu-bar> ' +
@@ -916,7 +916,7 @@
       '- ONE <script> at the end. Wire EVERY interactive id. Query via $ / $all / root, never document.getElementById. ' +
       '- Do NOT wrap in ```html. Return RAW HTML (one <script> allowed). No explanations. ' +
       '=== IMPROV COMEDY === ' +
-      'Go with weird requests but render them as real, WORKING XP apps. "Microsoft in Ancient Egypt" = a functioning business app in 3000 BC with scrolls and pyramids — buttons still work via <script>. Raw HTML + one <script> only.';
+      'Go with weird requests but render them as real, WORKING apps. "vibeOS in Ancient Egypt" = a functioning business app in 3000 BC with scrolls and pyramids — buttons still work via <script>. Raw HTML + one <script> only.';
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'https://api.deepseek.com/chat/completions', true);
@@ -940,7 +940,7 @@
         '\n\nImprove it per this request: "' + ctx.instruction + '". ' +
         'Keep what already works, apply the change, and return the COMPLETE updated inner body HTML (with its one <script>). Return only the HTML.';
     } else {
-      userMsg = 'Create content for a Windows XP app: ' + appName + '. Return only the inner body HTML.';
+      userMsg = 'Create content for a vibeOS app: ' + appName + '. Return only the inner body HTML.';
     }
     xhr.send(JSON.stringify({
       model: 'deepseek-chat',
@@ -1332,7 +1332,7 @@
           '<select><option>Blue (#3A6EA5)</option><option>Silver</option><option>Olive Green</option></select></div>' +
           '<div class="field-row"><label>Wallpaper:</label><input type="text" value="None"></div></fieldset>' +
           '<fieldset><legend>Screen Saver</legend><div class="field-row"><label>Screen saver:</label>' +
-          '<select><option>Windows XP</option><option>3D Pipes</option><option>Starfield</option></select></div>' +
+          '<select><option>vibeOS</option><option>3D Pipes</option><option>Starfield</option></select></div>' +
           '<div class="field-row"><label>Wait:</label><input type="text" value="10" style="width:40px"> minutes</div></fieldset>' +
           '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">' +
           '<button class="primary">OK</button><button>Cancel</button><button>Apply</button></div>');

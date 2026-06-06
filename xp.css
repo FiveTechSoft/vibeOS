@@ -1,5 +1,5 @@
 /* ==============================================
-   Windows XP Luna Theme — Complete
+   vibeOS Luna Theme — Complete
    Companion to 2026-06-05-vibeos-mvp.md Task 2
    ============================================== */
 
@@ -23,7 +23,7 @@ input, textarea, [contenteditable] {
   user-select: text;
 }
 
-/* === Theme Variables (default: Windows XP) === */
+/* === Theme Variables (default: vibeOS) === */
 body.theme-windows, body:not([class*="theme-"]) {
   --desktop-bg: #3A6EA5;
   --taskbar-bg: linear-gradient(to bottom, #3168D5 0%, #4993E6 2%, #3168D5 3%, #2156C0 100%);
