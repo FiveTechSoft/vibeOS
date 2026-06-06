@@ -105,6 +105,97 @@
   }
 
   // ================================================================
+  // Recent (AI-generated) apps — persisted in localStorage
+  // ================================================================
+  var RECENT_KEY = 'vibeos_recent_apps';
+  var RECENT_MAX = 12;
+  var recentApps = [];
+
+  function loadRecentApps() {
+    try {
+      var raw = localStorage.getItem(RECENT_KEY);
+      recentApps = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(recentApps)) recentApps = [];
+    } catch(e) { recentApps = []; }
+  }
+
+  function persistRecentApps() {
+    try { localStorage.setItem(RECENT_KEY, JSON.stringify(recentApps)); }
+    catch(e) {
+      // quota exceeded — drop oldest until it fits
+      while (recentApps.length > 1) {
+        recentApps.pop();
+        try { localStorage.setItem(RECENT_KEY, JSON.stringify(recentApps)); return; } catch(e2) {}
+      }
+    }
+  }
+
+  function addRecentApp(name, html) {
+    var key = name.toLowerCase();
+    recentApps = recentApps.filter(function(a){ return a.key !== key; });
+    recentApps.unshift({ key: key, name: name, html: html });
+    if (recentApps.length > RECENT_MAX) recentApps.length = RECENT_MAX;
+    persistRecentApps();
+    renderRecentApps();
+  }
+
+  function openRecentApp(key) {
+    for (var i = 0; i < recentApps.length; i++) {
+      if (recentApps[i].key === key) { openHallucinatedWindow(recentApps[i].name, recentApps[i].html); return; }
+    }
+  }
+
+  function clearRecentApps() {
+    recentApps = [];
+    try { localStorage.removeItem(RECENT_KEY); } catch(e) {}
+    renderRecentApps();
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderRecentApps() {
+    var sm = document.getElementById('start-recent');
+    var sep = document.getElementById('start-recent-sep');
+    if (sm) {
+      if (!recentApps.length) { sm.innerHTML = ''; if (sep) sep.style.display = 'none'; }
+      else {
+        if (sep) sep.style.display = 'block';
+        var h = '<div style="font-size:10px;color:#888;padding:2px 12px 1px">Recently used apps</div>';
+        recentApps.forEach(function(a){
+          h += '<div class="start-item" data-recent="' + escHtml(a.key) + '"><span class="start-icon">🪟</span><span>' + escHtml(a.name) + '</span></div>';
+        });
+        sm.innerHTML = h;
+      }
+    }
+    var rs = document.getElementById('recent-submenu');
+    if (rs) {
+      if (!recentApps.length) { rs.innerHTML = '<div class="context-item" style="color:#999;cursor:default">(none yet)</div>'; }
+      else {
+        var c = '';
+        recentApps.forEach(function(a){ c += '<div class="context-item" data-recent="' + escHtml(a.key) + '">🪟 ' + escHtml(a.name) + '</div>'; });
+        c += '<div style="border-top:1px solid #ACA899;margin:3px 2px"></div>';
+        c += '<div class="context-item" id="recent-clear">🗑 Clear recent apps</div>';
+        rs.innerHTML = c;
+      }
+    }
+    // Desktop icons — remove old generated ones, re-add from recentApps (keep built-ins)
+    var di = document.getElementById('desktop-icons');
+    if (di) {
+      var old = di.querySelectorAll('.desktop-icon[data-recent]');
+      for (var k = 0; k < old.length; k++) old[k].remove();
+      recentApps.forEach(function(a){
+        var el = document.createElement('div');
+        el.className = 'desktop-icon';
+        el.setAttribute('data-recent', a.key);
+        el.innerHTML = '<div class="icon-img">🪟</div><div class="icon-label">' + escHtml(a.name) + '</div>';
+        di.appendChild(el);
+      });
+    }
+  }
+
+  // ================================================================
   // App Bodies (content only, no window shell)
   // ================================================================
   var appRegistry = {
@@ -399,6 +490,7 @@
         return;
       }
       openHallucinatedWindow(name, html);
+      addRecentApp(name, html);
       hideRunDialog();
     });
   }
@@ -435,6 +527,8 @@
   document.addEventListener('dblclick', function(e) {
     var icon = e.target.closest('.desktop-icon');
     if (!icon) return;
+    var rec = icon.getAttribute('data-recent');
+    if (rec) { openRecentApp(rec); return; }
     var action = icon.getAttribute('data-action');
     if (action && appRegistry[action]) { openWindow(action, appRegistry[action]); }
     else if (action) {
@@ -633,7 +727,9 @@
   // ================================================================
   var ctxMenu = document.getElementById('desktop-menu');
   var styleSub = document.getElementById('style-submenu');
+  var recentSub = document.getElementById('recent-submenu');
   var styleHover = false, subHover = false;
+  var recentHover = false, recentSubHover = false;
 
   document.addEventListener('contextmenu', function(e) {
     var onDesktop = e.target.closest('.desktop') && !e.target.closest('.window');
@@ -648,6 +744,8 @@
       if (r.right  > window.innerWidth)  ctxMenu.style.left = (e.clientX - r.width) + 'px';
       if (r.bottom > window.innerHeight) ctxMenu.style.top  = (e.clientY - r.height) + 'px';
       if (styleSub) styleSub.style.display = 'none';
+      if (recentSub) recentSub.style.display = 'none';
+      renderRecentApps(); // keep submenu fresh
       applyTheme(currentTheme); // refresh checkmarks
     }
   });
@@ -657,10 +755,14 @@
     ctxMenu.addEventListener('mouseover', function(e) {
       var styleItem = e.target.closest('#ctx-style');
       if (styleItem && styleSub) { styleSub.style.display = 'block'; styleHover = true; }
+      else if (styleSub && !e.target.closest('#style-submenu')) { styleSub.style.display = 'none'; styleHover = false; }
+      var recentItem = e.target.closest('#ctx-recent');
+      if (recentItem && recentSub) { recentSub.style.display = 'block'; recentHover = true; }
+      else if (recentSub && !e.target.closest('#recent-submenu')) { recentSub.style.display = 'none'; recentHover = false; }
     });
     ctxMenu.addEventListener('mouseout', function(e) {
-      if (e.target.closest('#ctx-style') || e.target.closest('#style-submenu')) return;
-      if (styleSub) styleSub.style.display = 'none';
+      if (!e.target.closest('#ctx-style') && !e.target.closest('#style-submenu') && styleSub) styleSub.style.display = 'none';
+      if (!e.target.closest('#ctx-recent') && !e.target.closest('#recent-submenu') && recentSub) recentSub.style.display = 'none';
     });
   }
   if (styleSub) {
@@ -670,6 +772,31 @@
       setTimeout(function() { if (!styleHover && !subHover && styleSub) styleSub.style.display = 'none'; }, 100);
     });
   }
+  if (recentSub) {
+    recentSub.addEventListener('mouseover', function() { recentSubHover = true; });
+    recentSub.addEventListener('mouseout', function() {
+      recentSubHover = false;
+      setTimeout(function() { if (!recentHover && !recentSubHover && recentSub) recentSub.style.display = 'none'; }, 100);
+    });
+  }
+
+  // Open / clear recent apps (Start menu + context submenu)
+  document.addEventListener('click', function(e) {
+    var clear = e.target.closest('#recent-clear');
+    if (clear) {
+      clearRecentApps();
+      if (ctxMenu) ctxMenu.style.display = 'none';
+      if (recentSub) recentSub.style.display = 'none';
+      e.stopPropagation();
+      return;
+    }
+    var r = e.target.closest('[data-recent]');
+    if (!r || r.classList.contains('desktop-icon')) return; // desktop icons launch on dblclick
+    openRecentApp(r.getAttribute('data-recent'));
+    var sm = document.getElementById('start-menu'); if (sm) sm.style.display = 'none';
+    if (ctxMenu) ctxMenu.style.display = 'none';
+    if (recentSub) recentSub.style.display = 'none';
+  });
 
   document.addEventListener('click', function(e) {
     // Handle Style submenu theme selection
@@ -707,9 +834,13 @@
       }
       else if (action && appRegistry[action]) { openWindow(action, appRegistry[action]); }
 
-      if (ctxMenu && !e.target.closest('#ctx-style')) ctxMenu.style.display = 'none';
+      if (ctxMenu && !e.target.closest('#ctx-style') && !e.target.closest('#ctx-recent')) ctxMenu.style.display = 'none';
     }
   });
+
+  // Load persisted recent apps on startup
+  loadRecentApps();
+  renderRecentApps();
 
   // Clock
   function updateClock() {
