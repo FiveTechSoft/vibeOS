@@ -160,11 +160,14 @@
       'NEVER include outer window div, title bar, or status bar. ' +
       'NEVER wrap in ```html code blocks. Raw HTML only. ' +
       '' +
-      '=== CUSTOM HTML ELEMENTS (must use exactly as shown) === ' +
-      'Menu bar — ALWAYS first element: ' +
+      '=== CUSTOM HTML ELEMENTS (must use exactly as shown — these are real custom elements, NOT divs) === ' +
+      'CRITICAL: Every menu item with a dropdown MUST contain a <menu-popup> with <menu-row> children. ' +
+      'Without <menu-popup>, the menu will NOT open. This is how Windows XP menus work. ' +
+      '' +
+      'Menu bar (ALWAYS first element, exactly this structure): ' +
       '<menu-bar><menu-item>File<menu-popup><menu-row id="X-new">New</menu-row><menu-row id="X-open">Open...</menu-row><menu-row id="X-save">Save</menu-row><menu-divider></menu-divider><menu-row id="X-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Edit<menu-popup><menu-row id="X-undo">Undo</menu-row><menu-row id="X-cut">Cut</menu-row><menu-row id="X-copy">Copy</menu-row><menu-row id="X-paste">Paste</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="X-about">About</menu-row></menu-popup></menu-item></menu-bar> ' +
-      'Replace X- prefixes with app-specific ids. Each menu ITEM is: <menu-item>Label<menu-popup><menu-row id="...">Item</menu-row></menu-popup></menu-item> ' +
-      'Separator between menu rows: <menu-divider></menu-divider> ' +
+      'EVERY <menu-item> with a dropdown needs: Label<menu-popup><menu-row id="...">Item</menu-row></menu-popup>. ' +
+      'Separator is <menu-divider></menu-divider>. These are CUSTOM HTML ELEMENTS, not <div> tags. ' +
       '' +
       'Toolbar (optional, below menu): <div class="toolbar"><button>✂</button><button>📋</button><span class="toolbar-separator"></span><button>🔍</button></div> ' +
       '' +
@@ -185,6 +188,10 @@
       '=== EXAMPLE for "Paint" === ' +
       '<menu-bar><menu-item>File<menu-popup><menu-row id="pt-new">New</menu-row><menu-row id="pt-open">Open...</menu-row><menu-row id="pt-save">Save</menu-row><menu-divider></menu-divider><menu-row id="pt-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Edit<menu-popup><menu-row id="pt-undo">Undo</menu-row><menu-row id="pt-cut">Cut</menu-row><menu-row id="pt-copy">Copy</menu-row><menu-row id="pt-paste">Paste</menu-row></menu-popup></menu-item><menu-item>View<menu-popup><menu-row id="pt-toolbox">Tool Box</menu-row><menu-row id="pt-colors">Color Box</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="pt-about">About Paint</menu-row></menu-popup></menu-item></menu-bar><div class="toolbar"><button>✏️</button><button>🖌️</button><button>🧹</button><button>💧</button><button>🔤</button><span class="toolbar-separator"></span><button>🔍</button></div><div style="flex:1;display:flex;gap:4px;padding:4px"><div style="display:flex;flex-direction:column;gap:2px;padding:4px;background:#ECE9D8;border:1px solid #ACA899"><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:2px"><button style="width:20px;height:20px;padding:0;background:#000"></button><button style="width:20px;height:20px;padding:0;background:#808080"></button><button style="width:20px;height:20px;padding:0;background:#800000"></button><button style="width:20px;height:20px;padding:0;background:#008000"></button><button style="width:20px;height:20px;padding:0;background:#000080"></button><button style="width:20px;height:20px;padding:0;background:#808000"></button><button style="width:20px;height:20px;padding:0;background:#800080"></button><button style="width:20px;height:20px;padding:0;background:#008080"></button><button style="width:20px;height:20px;padding:0;background:#C0C0C0"></button><button style="width:20px;height:20px;padding:0;background:#FFFF00"></button><button style="width:20px;height:20px;padding:0;background:#FF00FF"></button><button style="width:20px;height:20px;padding:0;background:#00FFFF"></button><button style="width:20px;height:20px;padding:0;background:#FFFFFF;border:1px solid #999"></button><button style="width:20px;height:20px;padding:0;background:#FFA500"></button></div></div><div style="flex:1;background:#FFFFFF;border:1px solid #7F9DB9;min-height:200px;overflow:auto;display:flex;align-items:center;justify-content:center"><span style="color:#ACA899;font-size:14px">Canvas — draw here</span></div></div> ' +
       '' +
+      '=== REMINDERS === ' +
+      '- <menu-item> without <menu-popup> = dead click (dropdown will NOT open) ' +
+      '- Use EXACTLY these tags: <menu-bar> <menu-item> <menu-popup> <menu-row> <menu-divider> ' +
+      '- Do NOT wrap in ```html. Return RAW HTML. No explanations. ' +
       '=== IMPROV COMEDY === ' +
       'Go with weird requests but render them as real XP apps. "Microsoft in Ancient Egypt" = business app in 3000 BC with scrolls and pyramids. No <script> ever. Raw HTML only.';
 

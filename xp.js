@@ -12,13 +12,13 @@
     }
 
     // Close all menus
-    var allItems = document.querySelectorAll('.menu-item');
+    var allItems = document.querySelectorAll('menu-item');
     for (var i = 0; i < allItems.length; i++) {
       allItems[i].classList.remove('active');
     }
 
     // If we clicked a menu-item, activate it
-    var menuItem = e.target.closest('.menu-item');
+    var menuItem = e.target.closest('menu-item');
     if (menuItem) {
       menuItem.classList.add('active');
       e.stopPropagation();
@@ -33,7 +33,7 @@
 
   // Hover switching — mouseover on menu-item
   document.addEventListener('mouseover', function (e) {
-    var item = e.target.closest('.menu-item');
+    var item = e.target.closest('menu-item');
     if (!item) return;
 
     var parent = item.parentNode;
@@ -51,7 +51,7 @@
   // Escape key closes all active menus
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-      var activeItems = document.querySelectorAll('.menu-item.active');
+      var activeItems = document.querySelectorAll('menu-item.active');
       for (var i = 0; i < activeItems.length; i++) {
         activeItems[i].classList.remove('active');
       }

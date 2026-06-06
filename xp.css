@@ -583,17 +583,12 @@ div[role="progressbar"]::after {
 }
 .context-menu .context-item:hover { background: var(--menu-hover); color: white; }
 
-/* Active theme indicator in style submenu */
+/* Active theme indicator — inherits parent menu colors */
 #style-submenu .context-item.active-theme {
   font-weight: bold;
-  color: #000;
 }
 #style-submenu .context-item.active-theme::before {
   content: '✓ ';
-  font-weight: bold;
-}
-#style-submenu .context-item.active-theme:hover {
-  color: #fff;
 }
 
 /* === Dialog Overlay === */
