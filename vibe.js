@@ -64,7 +64,10 @@
     if (ex) ex.remove();
     var html = buildWindowShell(winId, info.title, info.icon, info.body(), info.w, info.h);
     applyDelta({ id: 'windows-container', op: 'append', html: html });
-    setTimeout(function() { centerWindow(winId); }, 50);
+    setTimeout(function() {
+      centerWindow(winId);
+      if (info.onOpen) info.onOpen();
+    }, 50);
   }
 
   function openHallucinatedWindow(title, bodyHTML) {
@@ -130,6 +133,22 @@
         '<div style="display:flex;align-items:center;gap:4px;background:#000;padding:2px 4px"><span style="color:#C0C0C0">C:\\></span>' +
         '<input type="text" style="flex:1;background:#000;color:#C0C0C0;border:1px solid #555;font-family:Consolas,monospace;font-size:13px"></div>';
       }
+    },
+    'open-minesweeper': {
+      title: 'Minesweeper', icon: '💣', w: 210, h: 350,
+      body: function() {
+        return '<menu-bar><menu-item>Game<menu-popup><menu-row id="ms-new">New</menu-row><menu-divider></menu-divider><menu-row id="ms-beginner">Beginner</menu-row><menu-row id="ms-intermediate">Intermediate</menu-row><menu-row id="ms-expert">Expert</menu-row><menu-divider></menu-divider><menu-row id="ms-exit">Exit</menu-row></menu-popup></menu-item><menu-item>Help<menu-popup><menu-row id="ms-about">About Minesweeper</menu-row></menu-popup></menu-item></menu-bar>' +
+        '<div style="background:#C0C0C0;padding:6px;flex:1;display:flex;flex-direction:column;gap:6px;border:2px outset #FFF">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px;border:2px inset #808080">' +
+        '<div id="ms-mines" style="background:#000;color:#F00;font-family:Consolas,monospace;font-size:20px;font-weight:bold;padding:2px 6px;min-width:46px;text-align:center;letter-spacing:1px">010</div>' +
+        '<button id="ms-face" style="width:36px;height:36px;padding:0;font-size:20px;min-height:0;line-height:1;border:2px outset #FFF;background:#C0C0C0">🙂</button>' +
+        '<div id="ms-timer" style="background:#000;color:#F00;font-family:Consolas,monospace;font-size:20px;font-weight:bold;padding:2px 6px;min-width:46px;text-align:center;letter-spacing:1px">000</div>' +
+        '</div>' +
+        '<div style="border:2px inset #808080;flex:1;display:flex;align-items:center;justify-content:center">' +
+        '<div id="ms-grid" style="display:grid;grid-template-columns:repeat(9,20px);grid-template-rows:repeat(9,20px);gap:0"></div>' +
+        '</div></div>';
+      },
+      onOpen: function() { msRenderAll(); }
     },
     'open-paint': {
       title: 'untitled - Paint', icon: '🎨', w: 800, h: 550,
@@ -301,7 +320,7 @@
       'file explorer':'open-explorer','explorer':'open-explorer',
       'command prompt':'open-cmd','cmd':'open-cmd',
       'internet explorer':'open-ie','ie':'open-ie','browser':'open-ie',
-      'paint':'open-paint','mspaint':'open-paint','minesweeper':'open-minesweeper','media player':'open-wmp','wmp':'open-wmp'
+      'paint':'open-paint','mspaint':'open-paint',
       'minesweeper':'open-minesweeper','media player':'open-wmp','wmp':'open-wmp'
     };
     return map[name.toLowerCase()] || null;
@@ -409,7 +428,138 @@
   }
 
   // ================================================================
-  // Desktop Right-Click Context Menu
+  // Minesweeper Engine
+  // ================================================================
+  var msGrid, msRevealed, msFlagged, msMineCount, msGameOver, msTimer, msTimerId;
+
+  function msInit(rows, cols, mines) {
+    msGrid = []; msRevealed = []; msFlagged = [];
+    msMineCount = mines; msGameOver = false; msTimer = 0;
+    if (msTimerId) clearInterval(msTimerId);
+    // Place mines
+    var i, j, m = 0;
+    for (i = 0; i < rows; i++) { msGrid[i] = []; msRevealed[i] = []; msFlagged[i] = []; for (j = 0; j < cols; j++) { msGrid[i][j] = 0; msRevealed[i][j] = false; msFlagged[i][j] = false; } }
+    while (m < mines) {
+      var r = Math.floor(Math.random() * rows), c = Math.floor(Math.random() * cols);
+      if (msGrid[r][c] !== -1) { msGrid[r][c] = -1; m++; }
+    }
+    // Count adjacent mines
+    for (i = 0; i < rows; i++) for (j = 0; j < cols; j++) {
+      if (msGrid[i][j] === -1) continue;
+      var count = 0;
+      for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) {
+        var ni = i+dr, nj = j+dc;
+        if (ni>=0 && ni<rows && nj>=0 && nj<cols && msGrid[ni][nj] === -1) count++;
+      }
+      msGrid[i][j] = count;
+    }
+    msRenderAll();
+    // Timer
+    msTimerId = setInterval(function() {
+      if (!msGameOver) { msTimer++; msUpdateDisplay(); }
+    }, 1000);
+  }
+
+  function msReveal(r, c) {
+    if (msGameOver || msRevealed[r][c] || msFlagged[r][c]) return;
+    msRevealed[r][c] = true;
+    if (msGrid[r][c] === -1) { msLose(); return; }
+    if (msGrid[r][c] === 0) {
+      for (var dr = -1; dr <= 1; dr++) for (var dc = -1; dc <= 1; dc++) {
+        var ni = r+dr, nj = c+dc;
+        if (ni>=0 && ni<9 && nj>=0 && nj<9) msReveal(ni, nj);
+      }
+    }
+    msCheckWin();
+  }
+
+  function msCheckWin() {
+    var won = true;
+    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) {
+      if (!msRevealed[i][j] && msGrid[i][j] !== -1) { won = false; break; }
+    }
+    if (won) { msGameOver = true; if (msTimerId) clearInterval(msTimerId); msUpdateDisplay(); }
+  }
+
+  function msLose() {
+    msGameOver = true; if (msTimerId) clearInterval(msTimerId);
+    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) msRevealed[i][j] = true;
+    msUpdateDisplay();
+  }
+
+  function msUpdateDisplay() {
+    var face = document.getElementById('ms-face');
+    var minesEl = document.getElementById('ms-mines');
+    var timerEl = document.getElementById('ms-timer');
+    var won = msGameOver && !msGrid.some(function(r,i) { return r.some(function(c,j) { return c===-1 && !msFlagged[i][j]; }); });
+    if (face) face.textContent = msGameOver ? (won ? '😎' : '💀') : '🙂';
+    if (minesEl) minesEl.textContent = String('000' + msMineCount).slice(-3);
+    if (timerEl) timerEl.textContent = String('000' + Math.min(msTimer, 999)).slice(-3);
+
+    var colors = ['','#0000FF','#008000','#FF0000','#000080','#800000','#008080','#000','#808080'];
+    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) {
+      var cell = document.getElementById('ms-c-'+i+'-'+j);
+      if (!cell) continue;
+      if (msRevealed[i][j]) {
+        cell.style.border = '1px solid #808080';
+        cell.style.background = '#C0C0C0';
+        cell.textContent = '';
+        if (msGrid[i][j] === -1) { cell.textContent = '💣'; cell.style.background = '#F00'; cell.style.fontSize = '12px'; }
+        else if (msGrid[i][j] > 0) { cell.textContent = msGrid[i][j]; cell.style.color = colors[msGrid[i][j]]; cell.style.fontWeight = 'bold'; }
+      } else {
+        cell.style.border = '2px outset #FFF';
+        cell.style.background = '#C0C0C0';
+        cell.textContent = msFlagged[i][j] ? '🚩' : '';
+        cell.style.color = '';
+        cell.style.fontWeight = '';
+        cell.style.fontSize = '12px';
+      }
+    }
+  }
+
+  function msRenderAll() {
+    var grid = document.getElementById('ms-grid');
+    if (!grid) return;
+    var html = '';
+    for (var i = 0; i < 9; i++) for (var j = 0; j < 9; j++) {
+      html += '<button id="ms-c-'+i+'-'+j+'" style="width:20px;height:20px;padding:0;min-height:0;font-size:11px;line-height:18px;text-align:center;border:2px outset #FFF;background:#C0C0C0;font-family:Tahoma,sans-serif"></button>';
+    }
+    grid.innerHTML = html;
+    msInit(9, 9, 10);
+  }
+
+  // Minesweeper click handler (delegated)
+  document.addEventListener('click', function(e) {
+    var cell = e.target.closest('[id^="ms-c-"]');
+    if (!cell) return;
+    var parts = cell.id.split('-');
+    var r = parseInt(parts[2]), c = parseInt(parts[3]);
+    if (isNaN(r) || isNaN(c) || !msRevealed || !msRevealed[r]) return;
+    msReveal(r, c);
+    e.stopPropagation();
+  });
+
+  document.addEventListener('contextmenu', function(e) {
+    var cell = e.target.closest('[id^="ms-c-"]');
+    if (!cell) return;
+    e.preventDefault();
+    var parts = cell.id.split('-');
+    var r = parseInt(parts[2]), c = parseInt(parts[3]);
+    if (isNaN(r) || isNaN(c) || msGameOver || msRevealed[r][c]) return;
+    msFlagged[r][c] = !msFlagged[r][c];
+    msMineCount += msFlagged[r][c] ? -1 : 1;
+    msUpdateDisplay();
+  });
+
+  // Handle minesweeper menu: New game
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest('[id]');
+    if (!el) return;
+    if (el.id === 'ms-new' || el.id === 'ms-beginner' || el.id === 'ms-face') {
+      msInit(9, 9, 10); e.stopPropagation();
+    }
+    if (el.id === 'ms-intermediate') { /* 16x16 if we resize */ msInit(9, 9, 10); e.stopPropagation(); }
+  });
   // ================================================================
   var ctxMenu = document.getElementById('desktop-menu');
   var styleSub = document.getElementById('style-submenu');
