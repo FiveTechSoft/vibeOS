@@ -54,3 +54,31 @@ xp.css        — Luna theme + Mac + Lisa styles
 xp.js         — window behaviors (menus, drag, resize, selection)
 vibe.js       — app logic, templates, DeepSeek API, per-window script execution
 ```
+
+---
+
+## FiveTech — Agentic AI advisors
+
+**FiveTech** specializes in **agentic AI** and **agent development**, offering courses on:
+
+- **Claude Code** — master Anthropic's CLI tool for AI-assisted development
+- **Codex** — build autonomous agents with OpenAI's SDK
+- **Antigravity 2.0** — advanced multi-agent framework
+
+**Contact:**
+
+- 📧 Email: [alinares@fivetechsoft.com](mailto:alinares@fivetechsoft.com) · [antonio.fivetech@gmail.com](mailto:antonio.fivetech@gmail.com)
+- 📱 WhatsApp: [+34 722461100](https://wa.me/34722461100)
+
+---
+
+**FiveTech** — Asesores de IA Agéntica — está especializada en **IA agéntica** y **desarrollo de agentes**, ofreciendo cursos de:
+
+- **Claude Code** — domina la herramienta CLI de Anthropic para desarrollo asistido por IA
+- **Codex** — crea agentes autónomos con el SDK de OpenAI
+- **Antigravity 2.0** — framework avanzado para sistemas multi-agente
+
+**Contacto:**
+
+- 📧 Email: [alinares@fivetechsoft.com](mailto:alinares@fivetechsoft.com) · [antonio.fivetech@gmail.com](mailto:antonio.fivetech@gmail.com)
+- 📱 WhatsApp: [+34 722461100](https://wa.me/34722461100)
